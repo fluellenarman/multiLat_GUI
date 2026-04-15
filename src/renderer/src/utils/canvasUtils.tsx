@@ -84,4 +84,9 @@ function pointFromAngleAndDistance(x: number, y: number, angle: number, distance
     };
 }
 
-export { utilFoo, drawCircle, drawRedCircle};
+export { utilFoo, 
+    drawCircle, 
+    drawRedCircle,
+    missile,
+    drone1,
+    drone2,};

@@ -1,5 +1,5 @@
 import { Component, onMount } from "solid-js";
-import { utilFoo, drawCircle, drawRedCircle } from "../utils/canvasUtils";
+import { utilFoo, drawCircle, drawRedCircle, missile } from "../utils/canvasUtils";
 
 interface renderBuffObj {
     x: number;
@@ -22,7 +22,10 @@ const Canvas: Component = () => {
             d1_x = obj.x;
             d1_y = obj.y;
             drawCircle(ctx, 1, 0);
-            drawRedCircle(ctx, 0, 0);
+            if (missile.alive == true) {
+                drawRedCircle(ctx, 0, 0);
+            }
+            // drawRedCircle(ctx, 0, 0);
         }
 
     }
