@@ -15,6 +15,7 @@ class droneState {
     x: number = 10;
     y: number = 10;
     id: string = "undefined";
+    alive: boolean = false;
 
     setId(id: string) {
         this.id = id;
@@ -26,6 +27,9 @@ const drone1 = new droneState();
 const drone2 = new droneState();
 drone1.setId("drone1");
 drone2.setId("drone2");
+
+const testDrone = new droneState();
+testDrone.setId("test");
 
 function utilFoo() {
     console.log("utilFoo called");
@@ -89,4 +93,6 @@ export { utilFoo,
     drawRedCircle,
     missile,
     drone1,
-    drone2,};
+    drone2,
+    testDrone
+};
