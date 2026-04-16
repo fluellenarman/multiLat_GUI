@@ -1,5 +1,8 @@
 import { Component, onMount } from "solid-js";
-import { utilFoo, drawCircle, drawRedCircle, missile, testDrone } from "../utils/canvasUtils";
+import { utilFoo, renderCircle, renderText,
+     drawCircle, renderRedCircle, drawRedCircle, 
+     missile, testDrone 
+} from "../utils/canvasUtils";
 
 interface renderBuffObj {
     x: number;
@@ -14,6 +17,7 @@ const Canvas: Component = () => {
     let d1_y = 0;
     let renderBuffer: renderBuffObj[] = [];
     
+    // All rendering should happen in this function.
     function renderObjs(ctx) {
         // pop from buffer and draw
         while (renderBuffer.length > 0) {
@@ -22,10 +26,14 @@ const Canvas: Component = () => {
             d1_x = obj.x;
             d1_y = obj.y;
             if (testDrone.alive == true) {
-                drawCircle(ctx, 1, 0);
+                testDrone.findNextPoint();
+                renderCircle(ctx, testDrone.x, testDrone.y);
+                renderText(ctx, testDrone.z.toString(), testDrone.x + 10, testDrone.y + 5);
             }
             if (missile.alive == true) {
-                drawRedCircle(ctx, 0, 0);
+                missile.findNextPoint();
+                renderRedCircle(ctx, missile.x, missile.y);
+                renderText(ctx, missile.z.toString(), missile.x + 10, missile.y + 5);
             }
             
             // drawRedCircle(ctx, 0, 0);
@@ -48,7 +56,7 @@ const Canvas: Component = () => {
     }
     
     function testIntervalFoo(ctx, canvas) {
-        console.log("testIntervalFoo called");
+        // console.log("testIntervalFoo called");
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         drawGrid(ctx, canvas);
         let obj: renderBuffObj = {
