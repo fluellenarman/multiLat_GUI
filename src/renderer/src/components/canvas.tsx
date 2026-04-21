@@ -74,6 +74,13 @@ const Canvas: Component = () => {
         frameCount += 1;
         if (frameCount >= 30) {
             console.log("Second triggered");
+            if (missile.alive == true) {
+                missile.lifespan -= 1;
+                if (missile.lifespan <= 0) {
+                    missile.alive = false;
+                    console.log("Missile expired");
+                }
+            }
             frameCount = 0;
         }
     }

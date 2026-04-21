@@ -10,6 +10,7 @@ class MissileState {
     speed: number = 1;
     
     alive: boolean = false;
+    lifespan: number = 10; // is seconds
 
     target: droneState | null = null;
     constructor() {
@@ -154,10 +155,6 @@ function renderRedCircle(ctx: CanvasRenderingContext2D, x: number, y: number) {
     ctx.stroke();
 }
 // Missile tracks target drone.
-// Returns the missile's position for the next frame.
-function missileTracking() {
-
-}
 
 // Math | Utility functions for pathfinding and movement.
 

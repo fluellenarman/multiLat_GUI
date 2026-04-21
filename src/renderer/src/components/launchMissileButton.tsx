@@ -4,6 +4,7 @@ import { missile } from '../utils/canvasUtils';
 const LaunchMissileButton: Component = () => { 
     function handleClick() {
         console.log("Launch button clicked");
+        missile.lifespan = 10;
         missile.alive = true;
     }
 
