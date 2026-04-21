@@ -4,11 +4,14 @@ class MissileState {
     z: number;
 
     curDirection: number = 0; // in degrees, 0 is to the right, increases counterclockwise
-    
+    turnRate: number = 10;
+
     zSpeed: number = 1;
     speed: number = 1;
     
     alive: boolean = false;
+
+    target: droneState | null = null;
     constructor() {
         this.x = 200;
         this.y = 200;
@@ -16,12 +19,45 @@ class MissileState {
     }
 
     findNextPoint() {
-        const angle = angleBetweenPoints(this.x, this.y, testDrone.x, testDrone.y).toFixed(2)
-        const point = pointFromAngleAndDistance(this.x, this.y, parseFloat(angle), this.speed);
+        // Calculate angle to target
+        let targetAngle = angleBetweenPoints(this.x, this.y, testDrone.x, testDrone.y);
+        targetAngle = normalizeAngle(targetAngle);
+
+        // Find the smallest difference (-180 to 180)
+        let angleDiff = targetAngle - this.curDirection;
+        angleDiff = ((angleDiff + 180) % 360) - 180;
+
+        // Clamp to turnRate
+        if (angleDiff > this.turnRate) angleDiff = this.turnRate;
+        if (angleDiff < -this.turnRate) angleDiff = -this.turnRate;
+
+        // Update direction
+        this.curDirection = normalizeAngle(this.curDirection + angleDiff);
+
+        // Move forward in current direction
+        const point = pointFromAngleAndDistance(this.x, this.y, this.curDirection, this.speed);
+
+        this.determineHit();
 
         this.x = point.x;
         this.y = point.y;
         this.z = zPointFromDestination(this.z, testDrone.z, this.zSpeed, this.zSpeed);
+    }
+
+    setTarget(target: droneState) {
+        this.target = target;
+    }
+
+    determineHit() {
+        const curDistanceToTarget = d3_distanceBetweenPoints(
+            this.x, this.y, this.z, 
+            testDrone.x, testDrone.y, testDrone.z);
+        
+        if (curDistanceToTarget < 5) {
+            console.log("Hit detected!");
+            this.alive = false;
+            testDrone.alive = false;
+        }
     }
 }
 
@@ -51,7 +87,7 @@ class droneState {
     findNextPoint() {
         if (this.ifAtPoint() == true) { return; }
 
-        console.log(this.currentPath);
+        // console.log(this.currentPath);
 
         const dest = this.currentPath[this.currentPathIndex];
         const angle = angleBetweenPoints(this.x, this.y, dest.x, dest.y);
@@ -93,18 +129,6 @@ function utilFoo() {
     console.log("utilFoo called");
 }
 
-function drawCircle(ctx: CanvasRenderingContext2D, x: number, y: number) {
-    drone1.x += x;
-    drone1.y += y;
-
-    // console.log(`drawCircle called with x=${drone1.x}, y=${drone1.y}`);
-    ctx.beginPath();
-    ctx.arc(drone1.x, drone1.y, 3, 0, 2 * Math.PI); // x, y, radius, startAngle, endAngle
-    ctx.fillStyle = "#000000ff";
-    ctx.fill();
-    ctx.stroke();
-    // requestAnimationFrame(testFrame);
-}
 
 // Same as drawCircle but without logic.
 function renderCircle(ctx: CanvasRenderingContext2D, x: number, y: number) {
@@ -120,28 +144,6 @@ function renderText(ctx: CanvasRenderingContext2D, text: string, x: number, y: n
     ctx.fillStyle = "#000000ff";
     ctx.fillText(text, x, y);
 
-}
-
-function drawRedCircle(ctx: CanvasRenderingContext2D, x: number, y: number) {
-    // missile.x += x;
-    // missile.y += y;
-
-    let angle = angleBetweenPoints(missile.x, missile.y, testDrone.x, testDrone.y).toFixed(2)
-    let point = pointFromAngleAndDistance(missile.x, missile.y, parseFloat(angle), 2);
-    // console.log(`Angle between missile and drone1: ${angleBetweenPoints(missile.x, missile.y, drone1.x, drone1.y).toFixed(2)} degrees`);
-    // console.log(`Point from angle and distance: x=${point.x.toFixed(2)}, y=${point.y.toFixed(2)}`);
-
-    missile.x = point.x;
-    missile.y = point.y;
-
-    // console.log(`drawRedCircle called with x=${missile.x}, y=${missile.y}`);
-    ctx.beginPath();
-    ctx.arc(missile.x, missile.y, 3, 0, 2 * Math.PI); // x, y, radius, startAngle, endAngle
-    ctx.fillStyle = "#ff0000ff";
-    ctx.fill();
-    ctx.stroke();
-    
-    // requestAnimationFrame(testFrame);
 }
 
 function renderRedCircle(ctx: CanvasRenderingContext2D, x: number, y: number) {
@@ -164,6 +166,15 @@ function angleBetweenPoints(x1: number, y1: number, x2: number, y2: number): num
 }
 
 function pointFromAngleAndDistance(x: number, y: number, angle: number, distance: number): { x: number, y: number } {
+    const radians = angle * (Math.PI / 180); // Convert to radians
+    return {
+        x: x + distance * Math.cos(radians),
+        y: y + distance * Math.sin(radians)
+    };
+}
+
+// Used only by the missile object, as it has a turning rate.
+function pointFromAngleDistanceTurningRate(x: number, y: number, angle: number, distance: number, turningRate: number): { x: number, y: number } {
     const radians = angle * (Math.PI / 180); // Convert to radians
     return {
         x: x + distance * Math.cos(radians),
@@ -198,14 +209,20 @@ function zPointFromDestination(currentZ: number, destZ: number, climbSpeed: numb
     return currentZ;
 }
 
+function normalizeAngle(angle: number): number {
+    return (angle + 360) % 360;
+}
+
+function convertAngleToRadians(angle: number): number {
+    return angle * (Math.PI / 180);
+}
+
 //
 
 export { utilFoo, 
     renderCircle,
     renderRedCircle,
     renderText,
-    drawCircle, 
-    drawRedCircle,
     missile,
     drone1,
     drone2,

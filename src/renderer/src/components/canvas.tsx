@@ -1,7 +1,7 @@
 import { Component, onMount } from "solid-js";
-import { utilFoo, renderCircle, renderText,
-     drawCircle, renderRedCircle, drawRedCircle, 
-     missile, testDrone 
+import { utilFoo, renderCircle, 
+        renderText, renderRedCircle,
+        missile, testDrone 
 } from "../utils/canvasUtils";
 
 interface renderBuffObj {
@@ -13,8 +13,6 @@ interface renderBuffObj {
 const Canvas: Component = () => {
     let global_x = 0;
     let global_y = 0;
-    let d1_x = 0;
-    let d1_y = 0;
     let renderBuffer: renderBuffObj[] = [];
     
     // All rendering should happen in this function.
@@ -23,8 +21,6 @@ const Canvas: Component = () => {
         while (renderBuffer.length > 0) {
             let obj = renderBuffer.shift()!;
             
-            d1_x = obj.x;
-            d1_y = obj.y;
             if (testDrone.alive == true) {
                 testDrone.findNextPoint();
                 renderCircle(ctx, testDrone.x, testDrone.y);
@@ -65,11 +61,21 @@ const Canvas: Component = () => {
             id: "test1"
         }
         renderBuffer.push(obj);
-
+        secTriggerCheck();
         requestAnimationFrame(() => renderObjs(ctx));
 
         global_x += 1;
         global_y += 1;
+    }
+
+    
+    let frameCount = 0
+    function secTriggerCheck() {
+        frameCount += 1;
+        if (frameCount >= 30) {
+            console.log("Second triggered");
+            frameCount = 0;
+        }
     }
 
     onMount(() => {
