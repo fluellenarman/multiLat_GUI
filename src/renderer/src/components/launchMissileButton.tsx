@@ -5,6 +5,9 @@ const LaunchMissileButton: Component = () => {
     function handleClick() {
         console.log("Launch button clicked");
         missile.lifespan = 10;
+        missile.x = missile.launcherX;
+        missile.y = missile.launcherY;
+        missile.curDirection = missile.initialDirection;
         missile.alive = true;
     }
 

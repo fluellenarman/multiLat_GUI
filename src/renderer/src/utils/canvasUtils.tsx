@@ -3,11 +3,15 @@ class MissileState {
     y: number;
     z: number;
 
-    curDirection: number = 0; // in degrees, 0 is to the right, increases counterclockwise
-    turnRate: number = 10;
+    launcherX: number = 500;
+    launcherY: number = 500;
+
+    initialDirection: number = 270;
+    curDirection: number = 270; // in degrees, 0 is to the right, increases counterclockwise
+    turnRate: number = 1;
 
     zSpeed: number = 1;
-    speed: number = 1;
+    speed: number = 3;
     
     alive: boolean = false;
     lifespan: number = 10; // is seconds
@@ -154,6 +158,40 @@ function renderRedCircle(ctx: CanvasRenderingContext2D, x: number, y: number) {
     ctx.fill();
     ctx.stroke();
 }
+
+function renderRect(ctx: CanvasRenderingContext2D, x: number, y: number, width: number, height: number) {
+    ctx.beginPath();
+    ctx.rect(x, y, width, height);
+    ctx.fillStyle = "#ff0000ff";
+    ctx.fill();
+    ctx.stroke();
+}
+
+function drawLauncherDirection(ctx: CanvasRenderingContext2D) {
+    // Define a new path
+    ctx.beginPath();
+    // Set a start-point
+    ctx.moveTo(missile.launcherX, missile.launcherY);
+
+    const end = pointFromAngleAndDistance(missile.launcherX, missile.launcherY, missile.initialDirection, 40);
+
+    // Set an end-point
+    ctx.lineTo(end.x, end.y);
+
+    ctx.stroke();
+}
+
+function changeLauncherDirection(ctx: CanvasRenderingContext2D, clickX: number, clickY: number) {
+    const distance = distanceBetweenPoints(clickX, clickY, missile.launcherX, missile.launcherY)
+    if (distance > 40) {
+        return false;
+    }
+    
+    const newAngle = angleBetweenPoints(missile.launcherX, missile.launcherY, clickX, clickY);
+    missile.initialDirection = newAngle;
+    return true;
+}
+
 // Missile tracks target drone.
 
 // Math | Utility functions for pathfinding and movement.
@@ -220,6 +258,9 @@ export { utilFoo,
     renderCircle,
     renderRedCircle,
     renderText,
+    renderRect,
+    drawLauncherDirection,
+    changeLauncherDirection,
     missile,
     drone1,
     drone2,

@@ -1,7 +1,7 @@
 import { Component, onMount } from "solid-js";
 import { utilFoo, renderCircle, 
-        renderText, renderRedCircle,
-        missile, testDrone 
+        renderText, renderRedCircle, renderRect, changeLauncherDirection,
+        missile, testDrone, drawLauncherDirection
 } from "../utils/canvasUtils";
 
 interface renderBuffObj {
@@ -21,6 +21,8 @@ const Canvas: Component = () => {
         while (renderBuffer.length > 0) {
             let obj = renderBuffer.shift()!;
             
+            renderRect(ctx, missile.launcherX, missile.launcherY, 10, 10);
+            drawLauncherDirection(ctx);
             if (testDrone.alive == true) {
                 testDrone.findNextPoint();
                 renderCircle(ctx, testDrone.x, testDrone.y);
@@ -87,16 +89,28 @@ const Canvas: Component = () => {
 
     onMount(() => {
         console.log("Canvas component mounted");
-        const canvas = document.getElementById("canvas") as HTMLCanvasElement | null;
-        
+        const canvas = document.getElementById("canvas") as HTMLCanvasElement;
+        const ctx = canvas.getContext("2d");
+
         if (canvas) {
             // Set canvas size
             canvas.width = 600;
             canvas.height = 600;
-            const ctx = canvas.getContext("2d");
             // requestAnimationFrame(testFrame);
             setInterval(() => testIntervalFoo(ctx, canvas), 1000 / 30);
         }
+        
+        canvas?.addEventListener("click", (event) => {
+            const rect = canvas.getBoundingClientRect()
+            const x = event.clientX - rect.left
+            const y = event.clientY - rect.top
+            if (changeLauncherDirection(ctx, x, y)) {
+                return;
+            }
+            missile.launcherX = x;
+            missile.launcherY = y;
+            console.log("Canvas clicked at", x, y); // (0,0) is top-left of canvas
+        });
     });
     return (
         <div>
