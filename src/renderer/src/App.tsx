@@ -5,6 +5,7 @@ import Canvas from './components/canvas'
 import LaunchMissileButton from './components/launchMissileButton'
 import TestDroneButton from './components/TestingDroneButton'
 import { TestingMode, setTestingMode, toggleTestingMode } from './utils/testingMode'
+import { FlareButton, flareArr } from './components/flaresButton'
 import electronLogo from './assets/electron.svg'
 import './assets/canvas.css'
 
@@ -17,8 +18,8 @@ const App: Component = () => {
       <TestDroneButton />
       <Show when={TestingMode() == true}>
         <LaunchMissileButton />
-
       </Show>
+      <FlareButton />
       <Canvas />
       {/* <Versions /> */}
     </>

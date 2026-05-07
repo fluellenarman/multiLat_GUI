@@ -23,8 +23,8 @@ const TestDroneButton: Component = () => {
         switch (target.value) {
             case "path1":
                 testDrone.currentPath.push(
-                    { x: 10, y: 10, z: 10},
-                    { x: 500, y: 10, z: 10 }
+                    { x: 50, y: 50, z: 10},
+                    { x: 500, y: 50, z: 10 }
                 )
                 
                 break;

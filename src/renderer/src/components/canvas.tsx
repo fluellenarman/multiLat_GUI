@@ -1,8 +1,12 @@
 import { Component, onMount } from "solid-js";
 import { utilFoo, renderCircle, 
         renderText, renderRedCircle, renderRect, changeLauncherDirection,
-        missile, testDrone, drawLauncherDirection
+        missile, testDrone, drawLauncherDirection,
+        flareState
 } from "../utils/canvasUtils";
+import {
+    flareArr
+} from "./flaresButton"
 
 interface renderBuffObj {
     x: number;
@@ -18,24 +22,36 @@ const Canvas: Component = () => {
     // All rendering should happen in this function.
     function renderObjs(ctx) {
         // pop from buffer and draw
-        while (renderBuffer.length > 0) {
-            let obj = renderBuffer.shift()!;
-            
-            renderRect(ctx, missile.launcherX, missile.launcherY, 10, 10);
-            drawLauncherDirection(ctx);
-            if (testDrone.alive == true) {
-                testDrone.findNextPoint();
-                renderCircle(ctx, testDrone.x, testDrone.y);
-                renderText(ctx, testDrone.z.toString(), testDrone.x + 10, testDrone.y + 5);
-            }
-            if (missile.alive == true) {
-                missile.findNextPoint();
-                renderRedCircle(ctx, missile.x, missile.y);
-                renderText(ctx, missile.z.toString(), missile.x + 10, missile.y + 5);
-            }
-            
-            // drawRedCircle(ctx, 0, 0);
+        // while (renderBuffer.length > 0) {
+        // let obj = renderBuffer.shift()!;
+        
+        renderRect(ctx, missile.launcherX, missile.launcherY, 10, 10);
+        drawLauncherDirection(ctx);
+        if (testDrone.alive == true) {
+            testDrone.findNextPoint();
+            renderCircle(ctx, testDrone.x, testDrone.y);
+            renderText(ctx, testDrone.z.toString(), testDrone.x + 10, testDrone.y + 5);
         }
+        if (missile.alive == true) {
+            missile.findNextPoint();
+            renderRedCircle(ctx, missile.x, missile.y);
+            renderText(ctx, missile.z.toString(), missile.x + 10, missile.y + 5);
+        }
+        if (flareArr.length > 0) {
+            for (let i = flareArr.length - 1; i >= 0; i--) {
+                let flare: flareState = flareArr[i];
+                if (flare.alive != true) {
+                    continue
+                    flareArr.splice(i,1);
+                } else {
+                    renderCircle(ctx, flare.x, flare.y);
+                    renderText(ctx, flare.z.toString(), flare.x + 10, flare.y + 5);
+                }
+            }
+        }
+        
+        // drawRedCircle(ctx, 0, 0);
+        // }
 
     }
 
@@ -62,7 +78,7 @@ const Canvas: Component = () => {
             y: 50 + global_y,
             id: "test1"
         }
-        renderBuffer.push(obj);
+        // renderBuffer.push(obj);
         secTriggerCheck();
         requestAnimationFrame(() => renderObjs(ctx));
 
@@ -75,12 +91,22 @@ const Canvas: Component = () => {
     function secTriggerCheck() {
         frameCount += 1;
         if (frameCount >= 30) {
-            console.log("Second triggered");
+            // console.log("Second triggered");
             if (missile.alive == true) {
                 missile.lifespan -= 1;
                 if (missile.lifespan <= 0) {
                     missile.alive = false;
                     console.log("Missile expired");
+                }
+            }
+            for (let i = 0; i < flareArr.length; i++) {
+                let flare: flareState = flareArr[i];
+                flare.lifespan -= 1;
+                if (flare.lifespan > 0) {
+                    const successChance = Math.random();
+                    if (successChance > .70) {
+                        missile.target = flare
+                    }
                 }
             }
             frameCount = 0;

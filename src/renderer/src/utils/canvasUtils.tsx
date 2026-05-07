@@ -6,17 +6,18 @@ class MissileState {
     launcherX: number = 500;
     launcherY: number = 500;
 
+    target: droneState | flareState | null = null;
+
     initialDirection: number = 270;
     curDirection: number = 270; // in degrees, 0 is to the right, increases counterclockwise
-    turnRate: number = 1;
+    turnRate: number = 3;
 
     zSpeed: number = 1;
-    speed: number = 3;
+    speed: number = 1;
     
     alive: boolean = false;
-    lifespan: number = 10; // is seconds
+    lifespan: number = 0; // is seconds. lifespan initialize in it's launch button.
 
-    target: droneState | null = null;
     constructor() {
         this.x = 200;
         this.y = 200;
@@ -25,7 +26,7 @@ class MissileState {
 
     findNextPoint() {
         // Calculate angle to target
-        let targetAngle = angleBetweenPoints(this.x, this.y, testDrone.x, testDrone.y);
+        let targetAngle = angleBetweenPoints(this.x, this.y, this.target.x, this.target.y);
         targetAngle = normalizeAngle(targetAngle);
 
         // Find the smallest difference (-180 to 180)
@@ -46,7 +47,7 @@ class MissileState {
 
         this.x = point.x;
         this.y = point.y;
-        this.z = zPointFromDestination(this.z, testDrone.z, this.zSpeed, this.zSpeed);
+        this.z = zPointFromDestination(this.z, this.target.z, this.zSpeed, this.zSpeed);
     }
 
     setTarget(target: droneState) {
@@ -56,12 +57,12 @@ class MissileState {
     determineHit() {
         const curDistanceToTarget = d3_distanceBetweenPoints(
             this.x, this.y, this.z, 
-            testDrone.x, testDrone.y, testDrone.z);
+            this.target.x, this.target.y, this.target.z);
         
         if (curDistanceToTarget < 5) {
             console.log("Hit detected!");
             this.alive = false;
-            testDrone.alive = false;
+            this.target.alive = false;
         }
     }
 }
@@ -80,8 +81,8 @@ class droneState {
 
     currentPathIndex: number = 0;
     currentPath: { x: number, y: number, z: number }[] = [
-        { x: 10, y: 10, z: 10},
-        { x: 500, y: 10, z: 10 }
+        { x: 50, y: 50, z: 10},
+        { x: 500, y: 50, z: 10 }
     ];
 
     setId(id: string) {
@@ -118,6 +119,43 @@ class droneState {
             return true;
         }
         return false;
+    }
+}
+
+class flareState {
+    x: number = 0;
+    y: number = 0;
+    z: number = 0;
+
+    alive: boolean = true;
+    zSpeed: number = 0;
+
+    lifespan: number = 5;
+
+    path: { x: number, y: number, z: number }[] = [];
+
+    
+
+    createFlarePath() {
+
+    }
+
+    frameCounter: number = 0
+    handleCountdown(interval: NodeJS.Timeout) {
+        this.frameCounter++;
+        if (this.frameCounter >= 30) {
+            this.frameCounter = 0
+            this.lifespan--;
+            if (this.lifespan <= 0) {
+                this.alive = false;
+                console.log("flare expired");
+                clearInterval(interval);
+            }
+        }
+    }
+
+    startLifeCountdown() {
+        const interval = setInterval(() => this.handleCountdown(interval), 33) // 30ms
     }
 }
 
@@ -259,6 +297,7 @@ export { utilFoo,
     renderRedCircle,
     renderText,
     renderRect,
+    flareState,
     drawLauncherDirection,
     changeLauncherDirection,
     missile,

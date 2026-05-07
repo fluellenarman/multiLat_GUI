@@ -1,13 +1,15 @@
 import {Component, onMount } from 'solid-js'
+import { testDrone } from '../utils/canvasUtils'
 import { missile } from '../utils/canvasUtils';
 
 const LaunchMissileButton: Component = () => { 
     function handleClick() {
         console.log("Launch button clicked");
-        missile.lifespan = 10;
+        missile.lifespan = 100;
         missile.x = missile.launcherX;
         missile.y = missile.launcherY;
         missile.curDirection = missile.initialDirection;
+        missile.target = testDrone;
         missile.alive = true;
     }
 
