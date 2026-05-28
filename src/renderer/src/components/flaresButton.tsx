@@ -5,6 +5,8 @@ import { Show } from 'solid-js'
 import { testDrone } from '../utils/canvasUtils';
 import { TestingMode, setTestingMode, toggleTestingMode } from '../utils/testingMode';
 import { flareState } from "../utils/canvasUtils";
+import {d3_distanceBetweenPoints, missile, angleFromThreePoints, pointFromAngleAndDistance } from "../utils/canvasUtils"
+import test from 'node:test';
 
 let flareArr = [];
 const FlareButton: Component = () => {
@@ -17,10 +19,35 @@ const FlareButton: Component = () => {
         if (frameCounter >= 15) {
             frameCounter = 0
             let flare = new flareState();
-            flare.x = testDrone.x;
-            flare.y = testDrone.y;
+            const point = pointFromAngleAndDistance(testDrone.x, testDrone.y, testDrone.rearAngle, 20);
+            flare.x = point.x;
+            flare.y = point.y;
             flare.z = testDrone.z;
             flare.lifespan = 5;
+            flare.id = curFlares;
+
+            // Only flare[1] is real, all others are just for show
+            if (curFlares == 1) {
+                
+                // Check for distance. If distance too far, flare.real =false
+                const distance = d3_distanceBetweenPoints(
+                    flare.x, flare.y, flare.z, 
+                    missile.x, missile.y, missile.z)
+                
+                if (distance > 200) {
+                    console.log("flare FAILED: Distance too far!")
+                } else {
+                    flare.real = true
+                    const MDF_angle = angleFromThreePoints(
+                        testDrone.x, testDrone.y,
+                        missile.x, missile.y,
+                        flare.x, flare.y
+                    )
+                    flare.MDF_angle = MDF_angle;
+                    // console.log("FDM angle: " + MDF_angle.toString())
+                    console.log("Spawned real flare")
+                }
+            }
             flare.startLifeCountdown();
             flareArr.push(flare);
             curFlares += 1;
@@ -32,7 +59,7 @@ const FlareButton: Component = () => {
     }
 
     function handleClick() {
-        console.log("Flare button clicked");
+        console.log("Flare button clicked1");
         // for (let i = 0; i < 5; i++) {
         const interval = setInterval(() => handleFrame(interval), 30)
         // }

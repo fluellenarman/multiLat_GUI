@@ -31,6 +31,7 @@ const Canvas: Component = () => {
             testDrone.findNextPoint();
             renderCircle(ctx, testDrone.x, testDrone.y);
             renderText(ctx, testDrone.z.toString(), testDrone.x + 10, testDrone.y + 5);
+            // console.log("TestDroneAngle: " + testDrone.forwardAngle.toString() + ", " + testDrone.rearAngle.toString());
         }
         if (missile.alive == true) {
             missile.findNextPoint();
@@ -101,11 +102,16 @@ const Canvas: Component = () => {
             }
             for (let i = 0; i < flareArr.length; i++) {
                 let flare: flareState = flareArr[i];
+                if (flare.real == true && !flare.hasBeenChecked && flare.alive == true) {
+                    missile.calculateChanceToTrackFlare(flare.MDF_angle, flare.id)
+                    flare.hasBeenChecked = true;
+                }
                 flare.lifespan -= 1;
                 if (flare.lifespan > 0) {
                     const successChance = Math.random();
-                    if (successChance > .70) {
+                    if (successChance < missile.chanceToTrackFlare && flare.real == true) {
                         missile.target = flare
+                        console.log("flare success!");
                     }
                 }
             }

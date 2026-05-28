@@ -20,6 +20,11 @@ $ npm install
 $ npm run dev
 ```
 
+to generate changes.patch
+```bash
+$ git diff --output=changes.patch
+```
+
 ### Build
 
 ```bash

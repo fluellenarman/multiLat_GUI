@@ -2,6 +2,7 @@ import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
+import {app} from 'electron'
 
 function createWindow(): void {
   // Create the browser window.
@@ -16,6 +17,10 @@ function createWindow(): void {
       sandbox: false
     }
   })
+
+  if (app.isPackaged == false) {
+      mainWindow.webContents.openDevTools({ mode: 'undocked'})
+  }
 
   mainWindow.on('ready-to-show', () => {
     mainWindow.show()

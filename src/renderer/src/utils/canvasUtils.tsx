@@ -12,6 +12,8 @@ class MissileState {
     curDirection: number = 270; // in degrees, 0 is to the right, increases counterclockwise
     turnRate: number = 3;
 
+    chanceToTrackFlare: number = .5
+
     zSpeed: number = 1;
     speed: number = 1;
     
@@ -63,7 +65,26 @@ class MissileState {
             console.log("Hit detected!");
             this.alive = false;
             this.target.alive = false;
+            this.x = this.launcherX
+            this.y = this.launcherY
+            this.z = 0
+            this.chanceToTrackFlare = 0.5;
         }
+    }
+
+    calculateChanceToTrackFlare(MDF_angle: number, flareId: number) {
+        const maxAngle = 90; // maximum considered angle (degrees)
+        const minChance = 0.1; // minimum chance
+        const maxChance = 1.0; // maximum chance
+
+        const absAngle = Math.abs(MDF_angle);
+        if (absAngle > maxAngle) {
+            this.chanceToTrackFlare = minChance;
+        } else {
+            // Linear interpolation: closer to 0 angle, higher the chance
+            this.chanceToTrackFlare = maxChance - ((absAngle / maxAngle) * (maxChance - minChance));
+        }
+        console.log("chanceToTrackFlare: " + this.chanceToTrackFlare.toString() + " \nMDF angle: " + MDF_angle.toString() + " \nflareId: " + flareId);
     }
 }
 
@@ -85,6 +106,9 @@ class droneState {
         { x: 500, y: 50, z: 10 }
     ];
 
+    forwardAngle: number = 0;
+    rearAngle: number = 0;
+
     setId(id: string) {
         this.id = id;
     }
@@ -99,6 +123,8 @@ class droneState {
         const angle = angleBetweenPoints(this.x, this.y, dest.x, dest.y);
         const nextPoint = pointFromAngleAndDistance(this.x, this.y, angle, this.speed);
         
+        this.updateAngles(angle);
+
         this.x = nextPoint.x;
         this.y = nextPoint.y;
         this.z = zPointFromDestination(this.z, dest.z, this.climbSpeed, this.fallSpeed);
@@ -120,6 +146,12 @@ class droneState {
         }
         return false;
     }
+
+
+    updateAngles(angle: number) {
+        this.forwardAngle = angle;
+        this.rearAngle = normalizeAngle(angle + 180);
+    }
 }
 
 class flareState {
@@ -127,14 +159,19 @@ class flareState {
     y: number = 0;
     z: number = 0;
 
+    id: number = 0;
+
     alive: boolean = true;
     zSpeed: number = 0;
 
     lifespan: number = 5;
+    real: boolean = false; // only 1 flare will be used for countermeasure
+
+    hasBeenChecked: boolean = false;
 
     path: { x: number, y: number, z: number }[] = [];
 
-    
+    MDF_angle: number = 180; // used for calculating flare success chance. Angle between drone->missile and drone->flare.
 
     createFlarePath() {
 
@@ -282,6 +319,25 @@ function zPointFromDestination(currentZ: number, destZ: number, climbSpeed: numb
     return currentZ;
 }
 
+// find angle from 3 points: current point, point1, point2.
+function angleFromThreePoints(
+    cx: number, cy: number, 
+    x1: number, y1: number, 
+    x2: number, y2: number): number 
+{
+    // Vectors from vertex to each point
+    const v1 = { x: x1 - cx, y: y1 - cy };
+    const v2 = { x: x2 - cx, y: y2 - cy };
+
+    const dotProduct = v1.x * v2.x + v1.y * v2.y;
+    const magnitudeV1 = Math.sqrt(v1.x ** 2 + v1.y ** 2);
+    const magnitudeV2 = Math.sqrt(v2.x ** 2 + v2.y ** 2);
+
+    const cosAngle = Math.max(-1, Math.min(1, dotProduct / (magnitudeV1 * magnitudeV2)));
+
+    return Math.acos(cosAngle) * (180 / Math.PI);
+}
+
 function normalizeAngle(angle: number): number {
     return (angle + 360) % 360;
 }
@@ -300,6 +356,9 @@ export { utilFoo,
     flareState,
     drawLauncherDirection,
     changeLauncherDirection,
+    d3_distanceBetweenPoints,
+    angleFromThreePoints,
+    pointFromAngleAndDistance,
     missile,
     drone1,
     drone2,
