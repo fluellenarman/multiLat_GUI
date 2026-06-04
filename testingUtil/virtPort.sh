@@ -1,0 +1,1 @@
+sudo socat -d -d pty,raw,echo=0,link=/dev/ttyACM0 pty,raw,echo=0,link=/dev/ttyACM1

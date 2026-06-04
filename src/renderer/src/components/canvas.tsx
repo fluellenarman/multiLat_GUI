@@ -8,11 +8,13 @@ import {
     flareArr
 } from "./flaresButton"
 
+
 interface renderBuffObj {
     x: number;
     y: number;
     id: string;
 }
+
 
 const Canvas: Component = () => {
     let global_x = 0;
@@ -131,6 +133,11 @@ const Canvas: Component = () => {
             // requestAnimationFrame(testFrame);
             setInterval(() => testIntervalFoo(ctx, canvas), 1000 / 30);
         }
+
+        // Listen for Serial data
+        window.api.onSerialData((data: string) => {
+            console.log("Received serial data in renderer:", data);
+        })
         
         canvas?.addEventListener("click", (event) => {
             const rect = canvas.getBoundingClientRect()

@@ -2,7 +2,11 @@ import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
-import {app} from 'electron'
+// import {app} from 'electron'
+import { SerialPort } from 'serialport';
+import { ReadlineParser } from '@serialport/parser-readline'
+import express from 'express';
+
 
 function createWindow(): void {
   // Create the browser window.
@@ -14,9 +18,50 @@ function createWindow(): void {
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
-      sandbox: false
+      sandbox: false,
     }
   })
+
+  // Create serial port
+  const port = new SerialPort({ 
+      path: '/dev/ttyACM0', 
+      baudRate: 115200,
+      autoOpen: false
+  });
+  // Open the port
+  port.open((err) => {
+    if (err) {
+      console.error('Failed to open port:', err.message);
+      return;
+    }
+    console.log('Port is open!');
+  });
+  const parser = new ReadlineParser({
+      delimiter: '\n',
+      encoding: 'utf8',
+      includeDelimiter: false,
+  })
+  // Pipe port to parser
+  port.pipe(parser)
+
+  parser.on('data', (line) => {
+    const serialData = line.trim();
+    // console.log('Received line:', serialData);
+    // console.log("SENDING");
+    mainWindow.webContents.send('serial-data', serialData);
+  });
+
+  // Express Server for testing (Receiving test Serial data)
+  const server = express();
+  server.use(express.json());
+  server.listen(3000, () => console.log('Listening on port 3000'));
+
+  server.post('/send', (req, res) => {
+    console.log(req.body.data);
+    res.send('Data received');
+    mainWindow.webContents.send('serial-data',req.body.data);
+  })
+
 
   if (app.isPackaged == false) {
       mainWindow.webContents.openDevTools({ mode: 'undocked'})
