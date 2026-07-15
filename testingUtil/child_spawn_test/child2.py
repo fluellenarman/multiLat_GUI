@@ -1,9 +1,18 @@
+# Test plan
+# Parent spawns python child
+# Parent feeds python child ranging data
+# python child does multilat calculation.
+# python child sends back calculation to JS parent.
+
+## Worker pattern
+
+import sys
+import json
 import localization as lx
 
-# Create a 3D project
+# Multilat solver
 P = lx.Project(mode="3D", solver="LSE")
 
-# Multilat solver
 def multilatSolver(anchorNames, anchorLocation, ranging):
     # Add anchors
     P.add_anchor(anchorNames[0], anchorLocation[0])
@@ -30,11 +39,9 @@ def multilatSolver(anchorNames, anchorLocation, ranging):
         "z": target.loc.z
     }
 
-    print(target.loc)
-    print(type(target.loc))
-    print(formattedData)
+    return formattedData
 
-print("Starting multilateration test")
+print("Python worker ready", flush=True)
 
 anchorNames = ["A0", "A1", "A2", "A3"]
 
@@ -45,11 +52,15 @@ anchorLocation = [
     (100, 50, 50)
 ]
 
-ranging = [
-    23.53720459187964,
-    25.826343140289914,
-    24.596747752497688,
-    21.470910553583888
-]
+for line in sys.stdin:
+    line = line.strip()
+    if not line:
+        continue
+    ranging = json.loads(line)
+    output = multilatSolver(anchorNames, anchorLocation, ranging)
+    # Process the input
+    result = json.dumps(output)
+    # result = f"Processed: {output}"
+    print(result, flush=True)  # flush=True is essential
 
-multilatSolver(anchorNames, anchorLocation, ranging)
+print("child2.py END")

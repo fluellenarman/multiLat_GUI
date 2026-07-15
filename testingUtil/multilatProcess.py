@@ -3,6 +3,11 @@ import localization as lx
 # Create a 3D project
 P = lx.Project(mode="3D", solver="LSE")
 
+# process string into usable input for multilatSovler
+def preProcess(received):
+    # It's a string
+    
+
 # Multilat solver
 def multilatSolver(anchorNames, anchorLocation, ranging):
     # Add anchors
@@ -23,16 +28,7 @@ def multilatSolver(anchorNames, anchorLocation, ranging):
     # Solve
     P.solve()
 
-    formattedData = {
-        "id": 0,
-        "x": target.loc.x,
-        "y": target.loc.y,
-        "z": target.loc.z
-    }
-
     print(target.loc)
-    print(type(target.loc))
-    print(formattedData)
 
 print("Starting multilateration test")
 
@@ -45,11 +41,12 @@ anchorLocation = [
     (100, 50, 50)
 ]
 
-ranging = [
-    23.53720459187964,
-    25.826343140289914,
-    24.596747752497688,
-    21.470910553583888
-]
-
-multilatSolver(anchorNames, anchorLocation, ranging)
+# Read from stdin line by line
+for line in sys.stdin:
+    received = line.strip()
+    # print(f"Child received: {received}", flush=True)
+    
+    # Process the data (example: convert to uppercase)
+    multilatSolver(anchorNames, anchorLocation, ranging)
+    
+    # Send response back to parent

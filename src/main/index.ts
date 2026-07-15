@@ -7,6 +7,9 @@ import { SerialPort } from 'serialport';
 import { ReadlineParser } from '@serialport/parser-readline'
 import express from 'express';
 
+import { spawnProcessAndListen, pyProcess } from "/src/main/utils/spawnChild.tsx";
+
+spawnProcessAndListen();
 
 function createWindow(): void {
   // Create the browser window.
@@ -101,6 +104,13 @@ app.whenReady().then(() => {
 
   // IPC test
   ipcMain.on('ping', () => console.log('pong'))
+
+  // Listen to for messages from renderer // specifically for python child
+  ipcMain.on('message-channel', (_event, data) => {
+    // console.log('Received message from renderer:', data);
+    const message = JSON.stringify(data) + '\n';
+    pyProcess.stdin.write(message);
+  });
 
   createWindow()
 

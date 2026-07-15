@@ -7,6 +7,7 @@ import { utilFoo, renderCircle,
 import {
     flareArr
 } from "./flaresButton"
+import { addHandler } from "electron-updater";
 
 
 interface renderBuffObj {
@@ -14,7 +15,6 @@ interface renderBuffObj {
     y: number;
     id: string;
 }
-
 
 const Canvas: Component = () => {
     let global_x = 0;
@@ -121,6 +121,33 @@ const Canvas: Component = () => {
         }
     }
 
+    const targetLocations = [
+        ['A', 0],
+        ['B', 0],
+        ['C', 0],
+        ['D', 0],
+    ];
+
+    function preProcessSerialData(data: string) {
+        const preArr = data.trim().split(/\s+/);
+        const letter    = preArr[0]; // 'A'
+        const num       = preArr[1]; // '1.50'
+        if      (letter == 'A') { targetLocations[0][1] = Number(num) }
+        else if (letter == 'B') { targetLocations[1][1] = Number(num) }
+        else if (letter == 'C') { targetLocations[2][1] = Number(num) }
+        else if (letter == 'D') { targetLocations[3][1] = Number(num) }
+    }
+
+    function ifTargetLocComplete() {
+        if (
+            targetLocations[0][1] != 0 &&
+            targetLocations[1][1] != 0 &&
+            targetLocations[2][1] != 0 && 
+            targetLocations[3][1] != 0
+        ) { return true }
+        else { return false}
+    }
+
     onMount(() => {
         console.log("Canvas component mounted");
         const canvas = document.getElementById("canvas") as HTMLCanvasElement;
@@ -137,6 +164,28 @@ const Canvas: Component = () => {
         // Listen for Serial data
         window.api.onSerialData((data: string) => {
             console.log("Received serial data in renderer:", data);
+            preProcessSerialData(data)
+            // Send data to mulilatProcess py
+            if (ifTargetLocComplete() == true) {
+                console.log("targetLocCompleted")
+                const ranging = [
+                    targetLocations[0][1],
+                    targetLocations[1][1],
+                    targetLocations[2][1],
+                    targetLocations[3][1],
+                ]
+
+                // Here, would send the ranging data to Python Child process
+                // renderer -IPC-> main -> python child
+                console.log(ranging);
+                window.rendToMainAPI.sendMessage(ranging); // replace testData with ranging
+
+                // End targetLocation
+                targetLocations[0][1] = 0
+                targetLocations[1][1] = 0
+                targetLocations[2][1] = 0
+                targetLocations[3][1] = 0
+            }
         })
         
         canvas?.addEventListener("click", (event) => {

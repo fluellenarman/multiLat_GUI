@@ -13,6 +13,11 @@ if (process.contextIsolated) {
   try {
     contextBridge.exposeInMainWorld('electron', electronAPI)
     contextBridge.exposeInMainWorld('api', api)
+
+    // one-way: renderer -> main, no response needed
+    contextBridge.exposeInMainWorld('rendToMainAPI', {
+      sendMessage: (data) => ipcRenderer.send('message-channel', data)
+    })
   } catch (error) {
     console.error(error)
   }
