@@ -47,6 +47,7 @@ const Canvas: Component = () => {
                     continue
                     flareArr.splice(i,1);
                 } else {
+                    flare.findNextPoint();
                     renderCircle(ctx, flare.x, flare.y);
                     renderText(ctx, flare.z.toString(), flare.x + 10, flare.y + 5);
                 }
@@ -94,6 +95,7 @@ const Canvas: Component = () => {
     function secTriggerCheck() {
         frameCount += 1;
         if (frameCount >= 30) {
+            // console.log("TestDrone forward angle: ", testDrone.forwardAngle)
             // console.log("Second triggered");
             if (missile.alive == true) {
                 missile.lifespan -= 1;
@@ -105,17 +107,18 @@ const Canvas: Component = () => {
             for (let i = 0; i < flareArr.length; i++) {
                 let flare: flareState = flareArr[i];
                 if (flare.real == true && !flare.hasBeenChecked && flare.alive == true) {
-                    missile.calculateChanceToTrackFlare(flare.MDF_angle, flare.id)
+                    missile.calculateChanceToTrackFlare(testDrone)
                     flare.hasBeenChecked = true;
-                }
-                flare.lifespan -= 1;
-                if (flare.lifespan > 0) {
-                    const successChance = Math.random();
-                    if (successChance < missile.chanceToTrackFlare && flare.real == true) {
-                        missile.target = flare
-                        console.log("flare success!");
+                    if (flare.lifespan > 0) {
+                        const successChance = Math.random()*100; // Determines if tracking follows flares or drone
+                        console.log("successChance: " + successChance.toString() + ", missile.chanceToTrackFlare: " + missile.chanceToTrackFlare.toString());
+                        if (successChance < missile.chanceToTrackFlare && flare.real == true) {
+                            missile.target = flare
+                            console.log("flare success!");
+                        }
                     }
                 }
+                flare.lifespan -= 1;
             }
             frameCount = 0;
         }

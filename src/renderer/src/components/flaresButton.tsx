@@ -17,39 +17,53 @@ const FlareButton: Component = () => {
         frameCounter++;
 
         if (frameCounter >= 15) {
-            frameCounter = 0
-            let flare = new flareState();
-            const point = pointFromAngleAndDistance(testDrone.x, testDrone.y, testDrone.rearAngle, 20);
-            flare.x = point.x;
-            flare.y = point.y;
-            flare.z = testDrone.z;
-            flare.lifespan = 5;
-            flare.id = curFlares;
-
-            // Only flare[1] is real, all others are just for show
-            if (curFlares == 1) {
-                
-                // Check for distance. If distance too far, flare.real =false
-                const distance = d3_distanceBetweenPoints(
-                    flare.x, flare.y, flare.z, 
-                    missile.x, missile.y, missile.z)
-                
-                if (distance > 200) {
-                    console.log("flare FAILED: Distance too far!")
+            var id = 0
+            for (let i = 0; i < 2; i++) {
+                id += 1
+                frameCounter = 0
+                let flare = new flareState();
+                const point = pointFromAngleAndDistance(testDrone.x, testDrone.y, testDrone.rearAngle, 20);
+                flare.x = testDrone.x;
+                flare.y = testDrone.y;
+                flare.z = testDrone.z;
+                flare.lifespan = 5;
+                flare.id = id;
+                if (i == 1) { 
+                    flare.angle = testDrone.forwardAngle - 30
+                    flare.isRight = false 
                 } else {
-                    flare.real = true
-                    const MDF_angle = angleFromThreePoints(
-                        testDrone.x, testDrone.y,
-                        missile.x, missile.y,
-                        flare.x, flare.y
-                    )
-                    flare.MDF_angle = MDF_angle;
-                    // console.log("FDM angle: " + MDF_angle.toString())
-                    console.log("Spawned real flare")
+                    flare.angle = testDrone.forwardAngle + 30
+                    flare.isRight = true
                 }
+
+                // Only flare[1] is real, all others are just for show
+                if (curFlares == 1) {
+                    
+                    // Check for distance. If distance too far, flare.real =false
+                    const distance = d3_distanceBetweenPoints(
+                        flare.x, flare.y, flare.z, 
+                        missile.x, missile.y, missile.z)
+                    
+                    if (distance > 200) {
+                        console.log("flare FAILED: Distance too far!")
+                    } else if (flare.isRight == true ) {
+                        flare.real = true
+                        console.log("Spawned real flare: flareId: " + flare.id)
+                        // const MDF_angle = angleFromThreePoints(
+                        //     testDrone.x, testDrone.y,
+                        //     missile.x, missile.y,
+                        //     flare.x, flare.y
+                        // )
+                        // flare.MDF_angle = MDF_angle;
+                        // // console.log("FDM angle: " + MDF_angle.toString())
+                        // console.log("Spawned real flare: MDF_angle: " + MDF_angle.toString() + ", flareId: " + flare.id)
+                    }
+                }
+                flare.startLifeCountdown();
+                flareArr.push(flare);
             }
-            flare.startLifeCountdown();
-            flareArr.push(flare);
+
+
             curFlares += 1;
             if (curFlares >= 5) {
                 curFlares = 0;

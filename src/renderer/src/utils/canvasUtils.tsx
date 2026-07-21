@@ -15,7 +15,7 @@ class MissileState {
     chanceToTrackFlare: number = .5
 
     zSpeed: number = 1;
-    speed: number = 1;
+    speed: number = 2;
     
     alive: boolean = false;
     lifespan: number = 0; // is seconds. lifespan initialize in it's launch button.
@@ -72,19 +72,37 @@ class MissileState {
         }
     }
 
-    calculateChanceToTrackFlare(MDF_angle: number, flareId: number) {
-        const maxAngle = 90; // maximum considered angle (degrees)
-        const minChance = 0.1; // minimum chance
-        const maxChance = 1.0; // maximum chance
-
-        const absAngle = Math.abs(MDF_angle);
-        if (absAngle > maxAngle) {
-            this.chanceToTrackFlare = minChance;
-        } else {
-            // Linear interpolation: closer to 0 angle, higher the chance
-            this.chanceToTrackFlare = maxChance - ((absAngle / maxAngle) * (maxChance - minChance));
+    // Change calculation to be based on distance instead of angle.
+    calculateChanceToTrackFlare(drone: droneState) {
+        const distanceToDrone = d3_distanceBetweenPoints(
+            this.x, this.y, this.z,
+            drone.x, drone.y, drone.z
+        );
+        console.log("Distance to drone: " + distanceToDrone.toString());
+        // The closer to 100, the higher the chance to track flare.
+        if (distanceToDrone <= 100) { 
+            const chance = 100 - distanceToDrone
+            this.chanceToTrackFlare = 100 - chance
+        } else if (distanceToDrone > 100) {
+            const chance = distanceToDrone - 100
+            this.chanceToTrackFlare = 100 - chance
         }
-        console.log("chanceToTrackFlare: " + this.chanceToTrackFlare.toString() + " \nMDF angle: " + MDF_angle.toString() + " \nflareId: " + flareId);
+        console.log("chanceToTrackFlare: " + this.chanceToTrackFlare.toString())
+        // // Saving commented code in case future calculations need to use angles
+        // const maxAngle = 90; // maximum considered angle (degrees)
+        // const minChance = 0.1; // minimum chance
+        // const maxChance = 1.0; // maximum chance
+
+        // const absAngle = Math.abs(MDF_angle);
+        // if (absAngle > maxAngle) {
+        //     this.chanceToTrackFlare = minChance;
+        // } else {
+        //     // Linear interpolation: closer to 0 angle, higher the chance
+        //     this.chanceToTrackFlare = maxChance - ((absAngle / maxAngle) * (maxChance - minChance));
+        // }
+        // console.log(    "chanceToTrackFlare: " + this.chanceToTrackFlare.toString() + 
+        //                 "\nMDF angle: " + MDF_angle.toString() + 
+        //                 "\nflareId: " + flareId);
     }
 }
 
@@ -165,16 +183,24 @@ class flareState {
     zSpeed: number = 0;
 
     lifespan: number = 5;
+    speed: number = 1;
     real: boolean = false; // only 1 flare will be used for countermeasure
 
     hasBeenChecked: boolean = false;
 
     path: { x: number, y: number, z: number }[] = [];
-
+    angle: number = 0;
+    isRight: boolean = true;
     MDF_angle: number = 180; // used for calculating flare success chance. Angle between drone->missile and drone->flare.
 
-    createFlarePath() {
+    // Arman, reference missileState's findNextPoint() for how to implement this.
+    findNextPoint() {
+        if  (this.isRight == true)  { this.angle += 1; } 
+        else                        { this.angle -= 1; }
 
+        const nextPoint = pointFromAngleAndDistance(this.x, this.y, this.angle, this.speed);
+        this.x = nextPoint.x;
+        this.y = nextPoint.y;
     }
 
     frameCounter: number = 0
