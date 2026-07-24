@@ -1,7 +1,7 @@
 import { Component, onMount } from "solid-js";
 import { utilFoo, renderCircle, 
-        renderText, renderRedCircle, renderRect, changeLauncherDirection,
-        missile, testDrone, drawLauncherDirection,
+        renderText, renderRedCircle, renderRect, changeLauncherDirection, renderRedRect,
+        missile, testDrone, drawLauncherDirection, droneTracker,
         flareState
 } from "../utils/canvasUtils";
 import {
@@ -23,9 +23,6 @@ const Canvas: Component = () => {
     
     // All rendering should happen in this function.
     function renderObjs(ctx) {
-        // pop from buffer and draw
-        // while (renderBuffer.length > 0) {
-        // let obj = renderBuffer.shift()!;
         
         renderRect(ctx, missile.launcherX, missile.launcherY, 10, 10);
         drawLauncherDirection(ctx);
@@ -54,9 +51,9 @@ const Canvas: Component = () => {
             }
         }
         
-        // drawRedCircle(ctx, 0, 0);
-        // }
 
+        droneTracker.renderDroneTracker(ctx);
+        droneTracker.drawLineTo(ctx, testDrone.x, testDrone.y);
     }
 
     function drawGrid(ctx, canvas) {

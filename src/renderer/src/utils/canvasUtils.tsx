@@ -222,6 +222,30 @@ class flareState {
     }
 }
 
+class DroneTracker {
+    x: number = 0;
+    y: number = 0
+    shouldDrawLine: boolean = false;
+
+    setCoords(x: number, y: number) {
+        this.x = x;
+        this.y = y;
+    }
+
+    renderDroneTracker(ctx: CanvasRenderingContext2D) {
+        renderRedRect(ctx, this.x, this.y);
+    }
+    drawLineTo(ctx: CanvasRenderingContext2D, x: number, y: number) {
+        if (this.shouldDrawLine == false) { return; }
+        ctx.moveTo(this.x + 5, this.y + 5);
+        ctx.lineTo(x, y);
+        ctx.stroke();
+    }
+}
+
+const droneTracker = new DroneTracker();
+droneTracker.setCoords(100, 100);
+
 const missile = new MissileState();
 const drone1 = new droneState();
 const drone2 = new droneState();
@@ -241,6 +265,14 @@ function renderCircle(ctx: CanvasRenderingContext2D, x: number, y: number) {
     ctx.beginPath();
     ctx.arc(x, y, 3, 0, 2 * Math.PI); // x, y, radius, startAngle, endAngle
     ctx.fillStyle = "#000000ff";
+    ctx.fill();
+    ctx.stroke();
+}
+
+function renderRedRect(ctx: CanvasRenderingContext2D, x: number, y: number) {
+    ctx.beginPath();
+    ctx.rect(x, y, 10, 10);
+    ctx.fillStyle = "#ff0000ff";
     ctx.fill();
     ctx.stroke();
 }
@@ -377,6 +409,8 @@ function convertAngleToRadians(angle: number): number {
 export { utilFoo, 
     renderCircle,
     renderRedCircle,
+    droneTracker,
+    renderRedRect,
     renderText,
     renderRect,
     flareState,
