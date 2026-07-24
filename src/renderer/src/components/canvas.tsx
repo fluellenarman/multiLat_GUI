@@ -29,6 +29,7 @@ const Canvas: Component = () => {
         if (testDrone.alive == true) {
             testDrone.findNextPoint();
             renderCircle(ctx, testDrone.x, testDrone.y);
+            testDrone.renderOptimalFlareCircle(ctx);
             renderText(ctx, testDrone.z.toString(), testDrone.x + 10, testDrone.y + 5);
             // console.log("TestDroneAngle: " + testDrone.forwardAngle.toString() + ", " + testDrone.rearAngle.toString());
         }
@@ -95,6 +96,7 @@ const Canvas: Component = () => {
             // console.log("TestDrone forward angle: ", testDrone.forwardAngle)
             // console.log("Second triggered");
             if (missile.alive == true) {
+                console.log("Missile lifespan: " + missile.lifespan.toString());
                 missile.lifespan -= 1;
                 if (missile.lifespan <= 0) {
                     missile.alive = false;
@@ -107,9 +109,9 @@ const Canvas: Component = () => {
                     missile.calculateChanceToTrackFlare(testDrone)
                     flare.hasBeenChecked = true;
                     if (flare.lifespan > 0) {
-                        const successChance = Math.random()*100; // Determines if tracking follows flares or drone
-                        console.log("successChance: " + successChance.toString() + ", missile.chanceToTrackFlare: " + missile.chanceToTrackFlare.toString());
-                        if (successChance < missile.chanceToTrackFlare && flare.real == true) {
+                        const missileHitChance = Math.random()*100; // Determines if tracking follows flares or drone
+                        console.log("missileHitChance: " + missileHitChance.toString() + ", missile.chanceToTrackFlare: " + missile.chanceToTrackFlare.toString());
+                        if (missileHitChance < missile.chanceToTrackFlare && flare.real == true) {
                             missile.target = flare
                             console.log("flare success!");
                         }

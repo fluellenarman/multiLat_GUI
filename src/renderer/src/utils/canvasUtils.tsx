@@ -10,15 +10,19 @@ class MissileState {
 
     initialDirection: number = 270;
     curDirection: number = 270; // in degrees, 0 is to the right, increases counterclockwise
+    initialTurnRate: number = 3;
     turnRate: number = 3;
 
     chanceToTrackFlare: number = .5
 
     zSpeed: number = 1;
+    initialSpeed: number = 2;
     speed: number = 2;
     
     alive: boolean = false;
+    initialLifeSpan: number = 0; // initialized during launch.
     lifespan: number = 0; // is seconds. lifespan initialize in it's launch button.
+    lifeCycle: number = 0; // launch, mid-course, terminal.
 
     constructor() {
         this.x = 200;
@@ -26,7 +30,25 @@ class MissileState {
         this.z = 5;
     }
 
+    checkLifeCycle() {
+        console.log("Initial: " + this.initialLifeSpan.toString() + "\nLifespan: " + this.lifespan.toString());
+        if (this.initialLifeSpan > this.lifespan && this.lifespan > 2) {
+            this.lifeCycle = 1; // mid-course
+            this.speed = this.initialSpeed;
+        } 
+        else if (this.lifespan <= 2) {
+            console.log("Missile in terminal phase");
+            this.lifeCycle = 2; // terminal
+            this.turnRate = 4; // 
+        }
+    }
+
     findNextPoint() {
+        this.checkLifeCycle();
+        if (this.lifeCycle == 0) {
+            this.z += this.zSpeed;
+            return;
+        }
         // Calculate angle to target
         let targetAngle = angleBetweenPoints(this.x, this.y, this.target.x, this.target.y);
         targetAngle = normalizeAngle(targetAngle);
@@ -169,6 +191,14 @@ class droneState {
     updateAngles(angle: number) {
         this.forwardAngle = angle;
         this.rearAngle = normalizeAngle(angle + 180);
+    }
+
+    // Render optimal flare circle. 
+    // This is a visual aid for the user to see which distance the flares/chaffs will be most effect
+    renderOptimalFlareCircle(ctx: CanvasRenderingContext2D) {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, 100, 0, 2 * Math.PI);
+        ctx.stroke();
     }
 }
 
