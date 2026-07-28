@@ -10,10 +10,16 @@ class MissileState {
 
     initialDirection: number = 270;
     curDirection: number = 270; // in degrees, 0 is to the right, increases counterclockwise
-    initialTurnRate: number = 3;
+    
     turnRate: number = 3;
+    midcourseTurnRate: number = 3;
+    terminalTurnRate: number = 4;
+    LOSonMidcourse: boolean = false;
 
     chanceToTrackFlare: number = .5
+    hitChance: number = 0 // compared against chanceToTrackFlare
+    LOSsupplement: number = 0 // Added on hitChance
+    finalHitChance: number = 0 
 
     zSpeed: number = 1;
     initialSpeed: number = 2;
@@ -31,15 +37,16 @@ class MissileState {
     }
 
     checkLifeCycle() {
-        console.log("Initial: " + this.initialLifeSpan.toString() + "\nLifespan: " + this.lifespan.toString());
+        // console.log("Initial: " + this.initialLifeSpan.toString() + "\nLifespan: " + this.lifespan.toString());
         if (this.initialLifeSpan > this.lifespan && this.lifespan > 2) {
             this.lifeCycle = 1; // mid-course
             this.speed = this.initialSpeed;
+            this.turnRate = this.midcourseTurnRate;
         } 
         else if (this.lifespan <= 2) {
-            console.log("Missile in terminal phase");
+            // console.log("Missile in terminal phase");
             this.lifeCycle = 2; // terminal
-            this.turnRate = 4; // 
+            this.turnRate = this.terminalTurnRate; // 
         }
     }
 
@@ -47,6 +54,14 @@ class MissileState {
         this.checkLifeCycle();
         if (this.lifeCycle == 0) {
             this.z += this.zSpeed;
+            return;
+        }
+        if (this.lifeCycle == 2 && this.LOSonMidcourse == false) {
+            console.log("Missile in terminal phase, no LOS on target. Continuing in current direction.");
+            const point = pointFromAngleAndDistance(this.x, this.y, this.curDirection, this.speed);
+            this.x = point.x;
+            this.y = point.y;
+            this.z = zPointFromDestination(this.z, this.target!.z, this.zSpeed, this.zSpeed);
             return;
         }
         // Calculate angle to target
@@ -255,7 +270,8 @@ class flareState {
 class DroneTracker {
     x: number = 0;
     y: number = 0
-    shouldDrawLine: boolean = false;
+    shouldDrawLine: boolean = true;
+    LOSachieved: boolean = false
 
     setCoords(x: number, y: number) {
         this.x = x;
@@ -271,10 +287,37 @@ class DroneTracker {
         ctx.lineTo(x, y);
         ctx.stroke();
     }
+
+    checkLOSatMidcourse(missile: MissileState) {
+        if (missile.lifeCycle == 1 && this.LOSachieved == false) { 
+            missile.LOSonMidcourse = true;
+            console.log("Missile has LOS on target at mid-course");
+        }
+    }
+
+    calculateLOSSupplement(missile: MissileState) {
+        this.checkLOSatMidcourse(missile);
+        if (this.LOSachieved == true && missile.LOSsupplement <= 25) {
+            missile.LOSsupplement += 0.1
+        }
+        else if (this.LOSachieved == false && missile.LOSsupplement > 0) {
+            missile.LOSsupplement -= 1
+        }
+    }
+
+    // For testing purposes only. Do not call in production
+    testBehavior() {
+        setInterval(() => {
+            this.shouldDrawLine = !this.shouldDrawLine;
+            if (this.shouldDrawLine == true)    { this.LOSachieved = true; }
+            else                                { this.LOSachieved = false; }
+        }, 5000)
+    }
 }
 
 const droneTracker = new DroneTracker();
 droneTracker.setCoords(100, 100);
+// droneTracker.testBehavior();
 
 const missile = new MissileState();
 const drone1 = new droneState();

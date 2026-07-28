@@ -51,8 +51,7 @@ const Canvas: Component = () => {
                 }
             }
         }
-        
-
+        droneTracker.calculateLOSSupplement(missile);
         droneTracker.renderDroneTracker(ctx);
         droneTracker.drawLineTo(ctx, testDrone.x, testDrone.y);
     }
@@ -109,9 +108,13 @@ const Canvas: Component = () => {
                     missile.calculateChanceToTrackFlare(testDrone)
                     flare.hasBeenChecked = true;
                     if (flare.lifespan > 0) {
-                        const missileHitChance = Math.random()*100; // Determines if tracking follows flares or drone
-                        console.log("missileHitChance: " + missileHitChance.toString() + ", missile.chanceToTrackFlare: " + missile.chanceToTrackFlare.toString());
-                        if (missileHitChance < missile.chanceToTrackFlare && flare.real == true) {
+                        missile.hitChance = Math.random()*100; // Determines if tracking follows flares or drone
+                        if (missile.LOSonMidcourse == true) {
+                            missile.hitChance += missile.LOSsupplement;
+                        }
+
+                        console.log("missileHitChance: " + missile.hitChance.toString() + ", missile.chanceToTrackFlare: " + missile.chanceToTrackFlare.toString());
+                        if (missile.hitChance < missile.chanceToTrackFlare && flare.real == true) {
                             missile.target = flare
                             console.log("flare success!");
                         }

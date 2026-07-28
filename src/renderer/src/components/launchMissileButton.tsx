@@ -14,9 +14,10 @@ const LaunchMissileButton: Component = () => {
         missile.target = testDrone;
         missile.alive = true;
         missile.lifeCycle = 0; // launch phase
+        missile.LOSonMidcourse = false;
     
         missile.initialSpeed = 2;
-        missile.initialTurnRate = 2;
+        missile.turnRate = missile.midcourseTurnRate;
     }
 
     return (
