@@ -6,10 +6,12 @@ import icon from '../../resources/icon.png?asset'
 import { SerialPort } from 'serialport';
 import { ReadlineParser } from '@serialport/parser-readline'
 import express from 'express';
+import { testFoo, startServer } from './utils/server';
 
 import { spawnProcessAndListen, pyProcess } from "/src/main/utils/spawnChild.tsx";
 
 spawnProcessAndListen();
+startServer()
 
 function createWindow(): void {
   // Create the browser window.
@@ -57,7 +59,7 @@ function createWindow(): void {
   // Express Server for testing (Receiving test Serial data)
   const server = express();
   server.use(express.json());
-  server.listen(3000, () => console.log('Listening on port 3000'));
+  server.listen(3000, () => console.log('Listening on port 3000 for test serial data...'));
 
   server.post('/send', (req, res) => {
     console.log(req.body.data);
