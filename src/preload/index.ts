@@ -18,6 +18,10 @@ if (process.contextIsolated) {
     contextBridge.exposeInMainWorld('rendToMainAPI', {
       sendMessage: (data) => ipcRenderer.send('message-channel', data)
     })
+    contextBridge.exposeInMainWorld('electronAPI', {
+      onPing: (callback) => ipcRenderer.on('ping', (_event, data) => callback(data))
+    })
+    
   } catch (error) {
     console.error(error)
   }

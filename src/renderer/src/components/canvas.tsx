@@ -7,14 +7,20 @@ import { utilFoo, renderCircle,
 import {
     flareArr
 } from "./flaresButton"
-import { addHandler } from "electron-updater";
-
+import {contextBridge, ipcRenderer } from 'electron'
 
 interface renderBuffObj {
     x: number;
     y: number;
     id: string;
 }
+
+window.electronAPI.onPing((data) => {
+    console.log("Received ping from main process:", data);
+    droneTracker.LOS_lifetime = droneTracker.LOS_default_lifetime; // Reset LOS lifetime on ping
+    droneTracker.LOS_achieved = true;
+    droneTracker.shouldDrawLine = true;
+})
 
 const Canvas: Component = () => {
     let global_x = 0;
@@ -122,6 +128,7 @@ const Canvas: Component = () => {
                 }
                 flare.lifespan -= 1;
             }
+            droneTracker.handleLOS_timer();
             frameCount = 0;
         }
     }

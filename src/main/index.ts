@@ -11,7 +11,6 @@ import { testFoo, startServer } from './utils/server';
 import { spawnProcessAndListen, pyProcess } from "/src/main/utils/spawnChild.tsx";
 
 spawnProcessAndListen();
-startServer()
 
 function createWindow(): void {
   // Create the browser window.
@@ -26,6 +25,7 @@ function createWindow(): void {
       sandbox: false,
     }
   })
+  startServer(mainWindow)
 
   // Create serial port
   const port = new SerialPort({ 

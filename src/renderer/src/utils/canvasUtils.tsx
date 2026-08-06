@@ -271,7 +271,18 @@ class DroneTracker {
     x: number = 0;
     y: number = 0
     shouldDrawLine: boolean = true;
-    LOSachieved: boolean = false
+    LOS_achieved: boolean = false
+
+    LOS_default_lifetime: number = 4;
+    LOS_lifetime: number = this.LOS_default_lifetime;
+
+    handleLOS_timer() {
+        this.LOS_lifetime -= 1
+        if (this.LOS_lifetime <= 0) {
+            this.LOS_achieved = false;
+        }
+        this.shouldDrawLine = this.LOS_achieved;
+    }
 
     setCoords(x: number, y: number) {
         this.x = x;
@@ -289,7 +300,7 @@ class DroneTracker {
     }
 
     checkLOSatMidcourse(missile: MissileState) {
-        if (missile.lifeCycle == 1 && this.LOSachieved == false) { 
+        if (missile.lifeCycle == 1 && this.LOS_achieved == false) { 
             missile.LOSonMidcourse = true;
             console.log("Missile has LOS on target at mid-course");
         }
@@ -297,20 +308,21 @@ class DroneTracker {
 
     calculateLOSSupplement(missile: MissileState) {
         this.checkLOSatMidcourse(missile);
-        if (this.LOSachieved == true && missile.LOSsupplement <= 25) {
+        if (this.LOS_achieved == true && missile.LOSsupplement <= 25) {
             missile.LOSsupplement += 0.1
         }
-        else if (this.LOSachieved == false && missile.LOSsupplement > 0) {
+        else if (this.LOS_achieved == false && missile.LOSsupplement > 0) {
             missile.LOSsupplement -= 1
         }
     }
 
     // For testing purposes only. Do not call in production
+    // Made defunct by feat #30
     testBehavior() {
         setInterval(() => {
             this.shouldDrawLine = !this.shouldDrawLine;
-            if (this.shouldDrawLine == true)    { this.LOSachieved = true; }
-            else                                { this.LOSachieved = false; }
+            if (this.shouldDrawLine == true)    { this.LOS_achieved = true; }
+            else                                { this.LOS_achieved = false; }
         }, 5000)
     }
 }
