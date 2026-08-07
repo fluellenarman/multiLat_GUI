@@ -19,7 +19,8 @@ if (process.contextIsolated) {
       sendMessage: (data) => ipcRenderer.send('message-channel', data)
     })
     contextBridge.exposeInMainWorld('electronAPI', {
-      onPing: (callback) => ipcRenderer.on('ping', (_event, data) => callback(data))
+      onPing: (callback) => ipcRenderer.on('ping', (_event, data) => callback(data)),
+      onReqToLaunch: (callback) => ipcRenderer.on('reqToLaunch', () => callback()),
     })
     
   } catch (error) {

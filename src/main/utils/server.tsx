@@ -18,11 +18,15 @@ function startServer(mainWindow: BrowserWindow) {
         res.send('Hello from the server!')
         console.log("ServerQueries.ts: Received GET request at /")
     })
-    server.post('/', (req, res) => {
+    server.post('/pingLOS', (req, res) => {
         res.send('Received POST request at /')
         console.log("ServerQueries.ts: Received POST request at /")
         console.log("ServerQueries.ts: Request body:", req.body)
         mainWindow.webContents.send('ping', req.body)
+    })
+    server.get('/pingMissileLaunch', (req, res) => {
+        console.log("ServerQueries.ts: Received POST request at /pingMissileLaunch")
+        mainWindow.webContents.send('reqToLaunch', {})     
     })
     testQuery();
 

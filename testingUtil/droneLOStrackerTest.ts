@@ -5,7 +5,7 @@ This is a test file that will send test pings to the server
 console.log("droneLOStrackerTest.ts: STARTING TESTS")
 
 async function sendTestPing() {
-    const testURL = 'http://localhost:3003';
+    const testURL = 'http://localhost:3003/pingLOS'; // Replace with your server URL
     const pingData = {
         ping: true,
     };
