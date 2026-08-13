@@ -276,6 +276,14 @@ class DroneTracker {
     LOS_default_lifetime: number = 4;
     LOS_lifetime: number = this.LOS_default_lifetime;
 
+    // Should reset when changing drone
+    quadrant: number = -1;
+    quadrantLetter: Map<number, string> = new Map<number, string>([
+        [0, 'C'], [1, 'F'], [2, 'I'],
+        [3, 'B'], [4, 'E'], [5, 'H'],
+        [6, 'A'], [7, 'D'], [8, 'G'],
+    ]);
+
     handleLOS_timer() {
         this.LOS_lifetime -= 1
         if (this.LOS_lifetime <= 0) {
@@ -313,6 +321,19 @@ class DroneTracker {
         }
         else if (this.LOS_achieved == false && missile.LOSsupplement > 0) {
             missile.LOSsupplement -= 1
+        }
+    }
+
+    calculateQuadrant(ctx: CanvasRenderingContext2D, x: number, y: number) {
+        const { width, height } = ctx.canvas.getBoundingClientRect();
+        
+        const col = Math.floor(x / (width / 3))
+        const row = Math.floor(y / (height / 3))
+
+        const currentQuadrant = row * 3 + col;
+        if (currentQuadrant !== this.quadrant) {
+            console.log("Quadrant: ", currentQuadrant, "Letter: ", this.quadrantLetter.get(currentQuadrant));
+            this.quadrant = currentQuadrant;
         }
     }
 
