@@ -44,6 +44,32 @@ const TestDroneButton: Component = () => {
                     { x: 10, y: 10, z: 100 }
                 )
                 break;
+            case "path4":
+                console.log("Path 4 selected");
+                testDrone.currentPath.push(
+                    { x: 10, y: 10, z: 10 },
+                    { x: 50, y: 50, z: 15 },
+                    { x: 100, y: 100, z: 20 },
+                    { x: 150, y: 150, z: 30 },
+                    { x: 200, y: 200, z: 40 },
+                    { x: 250, y: 250, z: 50 },
+                    { x: 300, y: 300, z: 60 },
+                    { x: 350, y: 350, z: 70 },
+                    { x: 400, y: 400, z: 80 },
+                    { x: 450, y: 450, z: 90 },
+                    { x: 500, y: 500, z: 100 },
+                    { x: 450, y: 450, z: 90 },
+                    { x: 400, y: 400, z: 80 },
+                    { x: 350, y: 350, z: 70 },
+                    { x: 300, y: 300, z: 60 },
+                    { x: 250, y: 250, z: 50 },
+                    { x: 200, y: 200, z: 40 },
+                    { x: 150, y: 150, z: 30 },
+                    { x: 100, y: 100, z: 20 },
+                    { x: 50, y: 50, z: 15 },
+                    { x: 10, y: 10, z: 10 }
+                )
+                break;
             default:
                 testDrone.currentPath = [
                     { x: 10, y: 10, z: 10 },
@@ -61,6 +87,7 @@ const TestDroneButton: Component = () => {
                     <option value="path1">Test 1</option>
                     <option value="path2">Test 2</option>
                     <option value="path3">Test 3</option>
+                    <option value="path4">Test 4</option>
                 </select>
             </Show>
         </div>

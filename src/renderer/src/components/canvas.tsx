@@ -34,14 +34,14 @@ const Canvas: Component = () => {
         drawLauncherDirection(ctx);
         if (testDrone.alive == true) {
             testDrone.findNextPoint();
-            renderCircle(ctx, testDrone.x, testDrone.y);
+            renderCircle(ctx, testDrone.x, testDrone.y, testDrone.z / 10 + 3);
             testDrone.renderOptimalFlareCircle(ctx);
             renderText(ctx, testDrone.z.toString(), testDrone.x + 10, testDrone.y + 5);
             // console.log("TestDroneAngle: " + testDrone.forwardAngle.toString() + ", " + testDrone.rearAngle.toString());
         }
         if (missile.alive == true) {
             missile.findNextPoint();
-            renderRedCircle(ctx, missile.x, missile.y);
+            renderRedCircle(ctx, missile.x, missile.y, missile.z / 10 + 3);
             renderText(ctx, missile.z.toString(), missile.x + 10, missile.y + 5);
         }
         if (flareArr.length > 0) {
