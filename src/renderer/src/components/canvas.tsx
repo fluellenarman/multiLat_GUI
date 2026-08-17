@@ -60,6 +60,7 @@ const Canvas: Component = () => {
         droneTracker.calculateLOSSupplement(missile);
         droneTracker.renderDroneTracker(ctx);
         droneTracker.drawLineTo(ctx, testDrone.x, testDrone.y);
+        droneTracker.calculateQuadrant(ctx, testDrone.x, testDrone.y);
     }
 
     function drawGrid(ctx, canvas) {
@@ -74,6 +75,20 @@ const Canvas: Component = () => {
         ctx.moveTo(0, canvas.height * (2/3));
         ctx.lineTo(canvas.width, canvas.height * (2/3));
         ctx.stroke();
+
+        ctx.fillStyle = "black";
+        ctx.font = "24px sans-serif";
+        ctx.textBaseline = "middle";
+        ctx.textAlign = "center";
+        ctx.fillText("C", canvas.width * (1/6), canvas.height * (1/6))
+        ctx.fillText("I", canvas.width * (5/6), canvas.height * (1/6))
+        ctx.fillText("B", canvas.width * (1/6), canvas.height * (1/2))
+        ctx.fillText("E", canvas.width * (1/2), canvas.height * (1/2))
+        ctx.fillText("H", canvas.width * (1/2), canvas.height * (5/6))
+        ctx.fillText("A", canvas.width * (1/6), canvas.height * (5/6))
+        ctx.fillText("D", canvas.width * (5/6), canvas.height * (1/2))
+        ctx.fillText("G", canvas.width * (5/6), canvas.height * (5/6))
+        ctx.fillText("F", canvas.width * (1/2), canvas.height * (1/6))
     }
     
     function testIntervalFoo(ctx, canvas) {
