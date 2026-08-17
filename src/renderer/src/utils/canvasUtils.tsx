@@ -346,9 +346,10 @@ function utilFoo() {
 
 
 // Same as drawCircle but without logic.
-function renderCircle(ctx: CanvasRenderingContext2D, x: number, y: number) {
+function renderCircle(ctx: CanvasRenderingContext2D, x: number, y: number, radius: number) {
     ctx.beginPath();
-    ctx.arc(x, y, 3, 0, 2 * Math.PI); // x, y, radius, startAngle, endAngle
+    // Change the divisor of z based on the units used
+    ctx.arc(x, y, radius, 0, 2 * Math.PI); // x, y, radius, startAngle, endAngle
     ctx.fillStyle = "#000000ff";
     ctx.fill();
     ctx.stroke();
@@ -369,9 +370,9 @@ function renderText(ctx: CanvasRenderingContext2D, text: string, x: number, y: n
 
 }
 
-function renderRedCircle(ctx: CanvasRenderingContext2D, x: number, y: number) {
+function renderRedCircle(ctx: CanvasRenderingContext2D, x: number, y: number, radius: number) {
     ctx.beginPath();
-    ctx.arc(missile.x, missile.y, 3, 0, 2 * Math.PI); // x, y, radius, startAngle, endAngle
+    ctx.arc(x, y, radius, 0, 2 * Math.PI); // x, y, radius, startAngle, endAngle
     ctx.fillStyle = "#ff0000ff";
     ctx.fill();
     ctx.stroke();
