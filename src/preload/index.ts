@@ -21,6 +21,7 @@ if (process.contextIsolated) {
     contextBridge.exposeInMainWorld('electronAPI', {
       onPing: (callback) => ipcRenderer.on('ping', (_event, data) => callback(data)),
       onReqToLaunch: (callback) => ipcRenderer.on('reqToLaunch', () => callback()),
+      onReqToLauncherLoc: (callback) => ipcRenderer.on('reqToLauncherLoc', (_event, data) => callback(data)),
     })
     
   } catch (error) {
