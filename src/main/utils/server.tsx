@@ -28,6 +28,12 @@ function startServer(mainWindow: BrowserWindow) {
         console.log("ServerQueries.ts: Received POST request at /pingMissileLaunch")
         mainWindow.webContents.send('reqToLaunch', {})     
     })
+    server.post('/pingLauncherLoc', (req, res) => {
+        console.log("ServerQueries.ts: Received POST request at /pingLauncherLoc")
+        console.log(req.body)
+        const data = req.body
+        mainWindow.webContents.send('reqToLauncherLoc', data)     
+    })
     testQuery();
 
     console.log("ServerQueries.ts: startServer() END\n")

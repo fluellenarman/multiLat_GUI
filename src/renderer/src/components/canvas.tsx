@@ -22,6 +22,16 @@ window.electronAPI.onPing((data) => {
     droneTracker.shouldDrawLine = true;
 })
 
+window.electronAPI.onReqToLauncherLoc((data) => {
+    console.log("Received reqToLauncherLoc from main process", data);
+    const launcherLoc = {
+        x: data.x * 20,
+        y: -((data.y * 40) - 600)
+    }
+    missile.launcherX = launcherLoc.x;
+    missile.launcherY = launcherLoc.y;
+})
+
 const Canvas: Component = () => {
     let global_x = 0;
     let global_y = 0;
@@ -64,6 +74,8 @@ const Canvas: Component = () => {
     }
 
     function drawGrid(ctx, canvas) {
+        console.log(canvas.width, canvas.height)
+
         ctx.beginPath();
         ctx.moveTo(canvas.width * (1/3), 0);
         ctx.lineTo(canvas.width * (1/3), canvas.height);
