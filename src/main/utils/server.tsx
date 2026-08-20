@@ -1,5 +1,5 @@
 import express from 'express'
-import { BrowserWindow } from 'electron'
+import { BrowserWindow, ipcMain } from 'electron'
 import os from 'os'
 
 function getLocalIPAddress() {
@@ -21,6 +21,14 @@ function getLocalIPAddress() {
 function testFoo() {
     console.log("server.tsx: testFoo called");
 }
+
+ipcMain.on('IP-address', (event, ipAddress) => {
+    console.log("Received IP address from renderer:", ipAddress);
+    const port = 3003
+    const url = `http://${ipAddress}:${port}/pingMissileLaunch`;
+    console.log("Constructed URL:", url);
+    testQuery2(url); // Later, will need to change the query to be a POST request with correct data.
+});
 
 function startServer(mainWindow: BrowserWindow) {
     getLocalIPAddress();
@@ -64,6 +72,12 @@ async function testQuery() {
     const data = await response.json();
     console.log(data);
     console.log("ServerQueries.ts: testQuery() END\n")
+}
+async function testQuery2(url) {
+    const response = await fetch(url);
+    const data = await response.json();
+    console.log(data);
+    console.log("ServerQueries.ts: testQuery2() END\n")
 }
 
 export { testFoo, startServer }

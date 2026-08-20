@@ -6,6 +6,7 @@ import LaunchMissileButton from './components/launchMissileButton'
 import TestDroneButton from './components/TestingDroneButton'
 import { TestingMode, setTestingMode, toggleTestingMode } from './utils/testingMode'
 import { FlareButton, flareArr } from './components/flaresButton'
+import { IP_addressInput } from './components/IPaddressInput'
 import electronLogo from './assets/electron.svg'
 import './assets/canvas.css'
 
@@ -20,6 +21,7 @@ const App: Component = () => {
         <LaunchMissileButton />
       </Show>
       <FlareButton />
+      <IP_addressInput />
       <Canvas />
       {/* <Versions /> */}
     </>
