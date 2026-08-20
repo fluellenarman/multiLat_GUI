@@ -1,11 +1,29 @@
 import express from 'express'
 import { BrowserWindow } from 'electron'
+import os from 'os'
+
+function getLocalIPAddress() {
+  const interfaces = os.networkInterfaces();
+  const addresses = [];
+
+  for (const name of Object.keys(interfaces)) {
+    for (const iface of interfaces[name]) {
+      // Skip internal (loopback) and non-IPv4 addresses
+      if (iface.family === 'IPv4' && !iface.internal) {
+        addresses.push({ name, address: iface.address });
+      }
+    }
+  }
+
+  console.log("from server, addresses:\n",addresses[0]?.address, '\n');
+}
 
 function testFoo() {
     console.log("server.tsx: testFoo called");
 }
 
 function startServer(mainWindow: BrowserWindow) {
+    getLocalIPAddress();
     const server = express()
     const port = 3003
     server.use(express.json())
