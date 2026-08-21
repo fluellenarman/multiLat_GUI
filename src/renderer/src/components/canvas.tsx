@@ -34,15 +34,19 @@ const Canvas: Component = () => {
         drawLauncherDirection(ctx);
         if (testDrone.alive == true) {
             testDrone.findNextPoint();
-            renderCircle(ctx, testDrone.x, testDrone.y, testDrone.z / 10 + 3);
+
+            const radius = testDrone.z / 10 + 3;
+            renderCircle(ctx, testDrone.x, testDrone.y, radius);
             testDrone.renderOptimalFlareCircle(ctx);
-            renderText(ctx, testDrone.z.toString(), testDrone.x + 10, testDrone.y + 5);
+            renderText(ctx, testDrone.z.toString(), testDrone.x, testDrone.y, radius + 5);
             // console.log("TestDroneAngle: " + testDrone.forwardAngle.toString() + ", " + testDrone.rearAngle.toString());
         }
         if (missile.alive == true) {
             missile.findNextPoint();
-            renderRedCircle(ctx, missile.x, missile.y, missile.z / 10 + 3);
-            renderText(ctx, missile.z.toString(), missile.x + 10, missile.y + 5);
+
+            const radius = missile.z / 10 + 3;
+            renderRedCircle(ctx, missile.x, missile.y, radius);
+            renderText(ctx, missile.z.toString(), missile.x, missile.y, radius + 5);
         }
         if (flareArr.length > 0) {
             for (let i = flareArr.length - 1; i >= 0; i--) {
@@ -52,8 +56,10 @@ const Canvas: Component = () => {
                     flareArr.splice(i,1);
                 } else {
                     flare.findNextPoint();
-                    renderCircle(ctx, flare.x, flare.y);
-                    renderText(ctx, flare.z.toString(), flare.x + 10, flare.y + 5);
+
+                    const radius = flare.z / 10 + 3;
+                    renderCircle(ctx, flare.x, flare.y, radius);
+                    renderText(ctx, flare.z.toString(), flare.x, flare.y, radius + 5);
                 }
             }
         }
