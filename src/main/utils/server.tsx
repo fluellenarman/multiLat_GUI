@@ -16,6 +16,7 @@ function getLocalIPAddress() {
   }
 
   console.log("from server, addresses:\n",addresses[0]?.address, '\n');
+  return addresses[0]?.address
 }
 
 function testFoo() {
@@ -31,13 +32,13 @@ ipcMain.on('IP-address', (event, ipAddress) => {
 });
 
 function startServer(mainWindow: BrowserWindow) {
-    getLocalIPAddress();
+    const ip = getLocalIPAddress();
     const server = express()
     const port = 3003
     server.use(express.json())
 
     server.listen(port, () => {
-        console.log(`ServerQueries.ts: Server is running on http://localhost:${port}`)
+        console.log(`ServerQueries.ts: Server is running on ${ip}:${port}`)
     })
 
     server.get('/', (req, res) => {
@@ -80,7 +81,19 @@ async function testQuery2(url) {
     console.log("ServerQueries.ts: testQuery2() END\n")
 }
 
-export { testFoo, startServer }
+async function sendTestQuery(ip: string) {
+    try {
+        const port = 3000
+        const response = await fetch(`http://${ip}:${port}`);
+        const data = await response.text();
+        console.log(data);
+        }
+    catch (error) {
+        console.log(error);
+    }
+}
+
+export { testFoo, startServer, sendTestQuery }
 
 /*
 ping received/handled will be in this JSON format.
