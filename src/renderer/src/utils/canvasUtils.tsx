@@ -384,10 +384,10 @@ function renderRedRect(ctx: CanvasRenderingContext2D, x: number, y: number) {
     ctx.stroke();
 }
 
-function renderText(ctx: CanvasRenderingContext2D, text: string, x: number, y: number) {
+function renderText(ctx: CanvasRenderingContext2D, text: string, x: number, y: number, radius: number) {
     ctx.font = "12px Arial";
     ctx.fillStyle = "#000000ff";
-    ctx.fillText(text, x, y);
+    ctx.fillText(text, x + radius, y + radius);
 
 }
 
