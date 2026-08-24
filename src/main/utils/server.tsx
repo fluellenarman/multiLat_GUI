@@ -1,49 +1,54 @@
 import express from 'express'
 import { BrowserWindow } from 'electron'
 import os from 'os'
+import { Discovery } from '../network/discovery';
 
 function getLocalIPAddress() {
-  const interfaces = os.networkInterfaces();
-  const addresses = [];
+    const interfaces = os.networkInterfaces();
+    const addresses = [];
 
-  for (const name of Object.keys(interfaces)) {
-    for (const iface of interfaces[name]) {
-      // Skip internal (loopback) and non-IPv4 addresses
-      if (iface.family === 'IPv4' && !iface.internal) {
-        addresses.push({ name, address: iface.address });
-      }
-    }
+    for (const name of Object.keys(interfaces)) {
+        for (const iface of interfaces[name]) {
+        // Skip internal (loopback) and non-IPv4 addresses
+        if (iface.family === 'IPv4' && !iface.internal) {
+            addresses.push({ name, address: iface.address });
+        }
+        }
   }
 
-  console.log("from server, addresses:\n",addresses[0]?.address, '\n');
+    console.log('from server, addresses:\n',addresses[0]?.address, '\n');
+    return addresses[0]?.address
 }
 
 function testFoo() {
-    console.log("server.tsx: testFoo called");
+    console.log('server.tsx: testFoo called');
 }
 
 function startServer(mainWindow: BrowserWindow) {
-    getLocalIPAddress();
+    const ip = getLocalIPAddress();
     const server = express()
     const port = 3003
     server.use(express.json())
 
+    const discovery = new Discovery('blue-gui', port)
+    discovery.start()
+
     server.listen(port, () => {
-        console.log(`ServerQueries.ts: Server is running on http://localhost:${port}`)
+        console.log(`ServerQueries.ts: Server is running on ${ip}:${port}`)
     })
 
     server.get('/', (req, res) => {
         res.send('Hello from the server!')
-        console.log("ServerQueries.ts: Received GET request at /")
+        console.log('ServerQueries.ts: Received GET request at /')
     })
     server.post('/pingLOS', (req, res) => {
         res.send('Received POST request at /')
-        console.log("ServerQueries.ts: Received POST request at /")
-        console.log("ServerQueries.ts: Request body:", req.body)
+        console.log('ServerQueries.ts: Received POST request at /')
+        console.log('ServerQueries.ts: Request body:', req.body)
         mainWindow.webContents.send('ping', req.body)
     })
     server.get('/pingMissileLaunch', (req, res) => {
-        console.log("ServerQueries.ts: Received POST request at /pingMissileLaunch")
+        console.log('ServerQueries.ts: Received POST request at /pingMissileLaunch')
         mainWindow.webContents.send('reqToLaunch', {})     
     })
     server.post('/pingLauncherLoc', (req, res) => {
@@ -54,7 +59,7 @@ function startServer(mainWindow: BrowserWindow) {
     })
     testQuery();
 
-    console.log("ServerQueries.ts: startServer() END\n")
+    console.log('ServerQueries.ts: startServer() END\n')
 }
 
 async function testQuery() {
@@ -63,7 +68,7 @@ async function testQuery() {
     const response = await fetch(testURL);
     const data = await response.json();
     console.log(data);
-    console.log("ServerQueries.ts: testQuery() END\n")
+    console.log('ServerQueries.ts: testQuery() END\n')
 }
 
 export { testFoo, startServer }
