@@ -32,6 +32,15 @@ window.electronAPI.onReqToLauncherLoc((data) => {
     missile.launcherY = launcherLoc.y;
 })
 
+window.electronAPI.onReqToLOSLoc((data) => {
+    console.log("Received reqToLOSLoc from main process", data);
+    const LOSLoc = {
+        x: data.x * 20,
+        y: -((data.y * 40) - 600)
+    }
+    droneTracker.setCoords(LOSLoc.x, LOSLoc.y)
+})
+
 const Canvas: Component = () => {
     let global_x = 0;
     let global_y = 0;
