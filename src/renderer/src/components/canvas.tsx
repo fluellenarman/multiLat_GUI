@@ -80,8 +80,6 @@ const Canvas: Component = () => {
     }
 
     function drawGrid(ctx, canvas) {
-        console.log(canvas.width, canvas.height)
-
         ctx.beginPath();
         ctx.moveTo(canvas.width * (1/3), 0);
         ctx.lineTo(canvas.width * (1/3), canvas.height);

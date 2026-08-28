@@ -16,6 +16,7 @@ function getLocalIPAddress() {
   }
 
   console.log("from server, addresses:\n",addresses[0]?.address, '\n');
+  console.log(`http://${addresses[0]?.address}:3003/`);
 }
 
 function testFoo() {
@@ -24,8 +25,8 @@ function testFoo() {
 
 ipcMain.on('IP-address', (event, ipAddress) => {
     console.log("Received IP address from renderer:", ipAddress);
-    const port = 3003
-    const url = `http://${ipAddress}:${port}/pingMissileLaunch`;
+    const redPort = 3000
+    const url = `http://${ipAddress}:${redPort}/`;
     console.log("Constructed URL:", url);
     testQuery2(url); // Later, will need to change the query to be a POST request with correct data.
 });
@@ -41,7 +42,7 @@ function startServer(mainWindow: BrowserWindow) {
     })
 
     server.get('/', (req, res) => {
-        res.send('Hello from the server!')
+        res.send('Hello from BLUE GUI server!')
         console.log("ServerQueries.ts: Received GET request at /")
     })
     server.post('/pingLOS', (req, res) => {
