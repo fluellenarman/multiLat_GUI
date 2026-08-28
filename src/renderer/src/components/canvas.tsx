@@ -39,9 +39,12 @@ const Canvas: Component = () => {
     
     // All rendering should happen in this function.
     function renderObjs(ctx) {
-        
-        renderRect(ctx, missile.launcherX, missile.launcherY, 10, 10);
-        drawLauncherDirection(ctx);
+        if (missile.launcherShown)
+        {
+            renderRect(ctx, missile.launcherX, missile.launcherY, 10, 10);
+            drawLauncherDirection(ctx);
+        }
+
         if (testDrone.alive == true) {
             testDrone.findNextPoint();
 
