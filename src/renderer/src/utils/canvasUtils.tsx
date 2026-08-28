@@ -58,6 +58,8 @@ class MissileState {
             this.z += this.zSpeed;
             return;
         }
+        this.launched = true
+
         if (this.lifeCycle == 2 && this.LOSonMidcourse == false) {
             console.log("Missile in terminal phase, no LOS on target. Continuing in current direction.");
             const point = pointFromAngleAndDistance(this.x, this.y, this.curDirection, this.speed);
@@ -66,7 +68,6 @@ class MissileState {
             this.z = zPointFromDestination(this.z, this.target!.z, this.zSpeed, this.zSpeed);
             return;
         }
-        this.launched = true
         // Calculate angle to target
         let targetAngle = angleBetweenPoints(this.x, this.y, this.target.x, this.target.y);
         targetAngle = normalizeAngle(targetAngle);
