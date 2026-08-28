@@ -6,8 +6,8 @@ function getLocalIPAddress() {
   const interfaces = os.networkInterfaces();
   const addresses = [];
 
-  for (const name of Object.keys(interfaces)) {
-    for (const iface of interfaces[name]) {
+  for (const name of Object.keys(interfaces).filter((name) => /wi-?fi|wireless|^wlan/i.test(name))) {
+    for (const iface of interfaces[name] ?? []) {
       // Skip internal (loopback) and non-IPv4 addresses
       if (iface.family === 'IPv4' && !iface.internal) {
         addresses.push({ name, address: iface.address });
@@ -16,6 +16,7 @@ function getLocalIPAddress() {
   }
 
   console.log("from server, addresses:\n",addresses[0]?.address, '\n');
+  return addresses[0]?.address
 }
 
 function testFoo() {
@@ -31,13 +32,13 @@ ipcMain.on('IP-address', (event, ipAddress) => {
 });
 
 function startServer(mainWindow: BrowserWindow) {
-    getLocalIPAddress();
+    const ip = getLocalIPAddress();
     const server = express()
     const port = 3003
     server.use(express.json())
 
     server.listen(port, () => {
-        console.log(`ServerQueries.ts: Server is running on http://localhost:${port}`)
+        console.log(`ServerQueries.ts: Server is running on http://${ip}:${port}`)
     })
 
     server.get('/', (req, res) => {
