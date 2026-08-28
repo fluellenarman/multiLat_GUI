@@ -20,6 +20,7 @@ window.electronAPI.onPing((data) => {
     droneTracker.LOS_lifetime = droneTracker.LOS_default_lifetime; // Reset LOS lifetime on ping
     droneTracker.LOS_achieved = true;
     droneTracker.shouldDrawLine = true;
+    droneTracker.showTracker = true;
 })
 
 window.electronAPI.onReqToLauncherLoc((data) => {
@@ -74,9 +75,11 @@ const Canvas: Component = () => {
             }
         }
         droneTracker.calculateLOSSupplement(missile);
-        droneTracker.renderDroneTracker(ctx);
-        droneTracker.drawLineTo(ctx, testDrone.x, testDrone.y);
         droneTracker.calculateQuadrant(ctx, testDrone.x, testDrone.y);
+        if (droneTracker.showTracker) {
+            droneTracker.renderDroneTracker(ctx);
+            droneTracker.drawLineTo(ctx, testDrone.x, testDrone.y);
+        }
     }
 
     function drawGrid(ctx, canvas) {
