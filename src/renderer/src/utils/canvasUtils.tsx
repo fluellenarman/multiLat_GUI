@@ -29,6 +29,8 @@ class MissileState {
     initialLifeSpan: number = 0; // initialized during launch.
     lifespan: number = 0; // is seconds. lifespan initialize in it's launch button.
     lifeCycle: number = 0; // launch, mid-course, terminal.
+    launchHeight: number = 30
+    launched: boolean = false
 
     constructor() {
         this.x = 200;
@@ -52,7 +54,7 @@ class MissileState {
 
     findNextPoint() {
         this.checkLifeCycle();
-        if (this.lifeCycle == 0) {
+        if (this.z < this.launchHeight && this.launched === false) {
             this.z += this.zSpeed;
             return;
         }
@@ -64,6 +66,7 @@ class MissileState {
             this.z = zPointFromDestination(this.z, this.target!.z, this.zSpeed, this.zSpeed);
             return;
         }
+        this.launched = true
         // Calculate angle to target
         let targetAngle = angleBetweenPoints(this.x, this.y, this.target.x, this.target.y);
         targetAngle = normalizeAngle(targetAngle);
@@ -310,7 +313,7 @@ class DroneTracker {
     checkLOSatMidcourse(missile: MissileState) {
         if (missile.lifeCycle == 1 && this.LOS_achieved == false) { 
             missile.LOSonMidcourse = true;
-            console.log("Missile has LOS on target at mid-course");
+            // console.log("Missile has LOS on target at mid-course");
         }
     }
 

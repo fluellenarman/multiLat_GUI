@@ -12,6 +12,7 @@ function handleClick() {
     missile.lifespan = missile.initialLifeSpan; // should only travel roughly 1 square
     missile.x = missile.launcherX;
     missile.y = missile.launcherY;
+    missile.z = 5
     
     missile.curDirection = missile.initialDirection;
     missile.target = testDrone;
@@ -21,6 +22,8 @@ function handleClick() {
 
     missile.initialSpeed = 2;
     missile.turnRate = missile.midcourseTurnRate;
+
+    missile.launched = false
 }
 
 const LaunchMissileButton: Component = () => { 
