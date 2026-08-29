@@ -110,7 +110,7 @@ class MissileState {
     }
 
     // Change calculation to be based on distance instead of angle.
-    calculateChanceToTrackFlare(drone: droneState) {
+    calculateChanceToTrackFlare(drone: droneState, sensorData: number) {
         const distanceToDrone = d3_distanceBetweenPoints(
             this.x, this.y, this.z,
             drone.x, drone.y, drone.z
@@ -119,10 +119,10 @@ class MissileState {
         // The closer to 100, the higher the chance to track flare.
         if (distanceToDrone <= 100) { 
             const chance = 100 - distanceToDrone
-            this.chanceToTrackFlare = 100 - chance
+            this.chanceToTrackFlare = Math.max(0, 100 - chance - sensorData)
         } else if (distanceToDrone > 100) {
             const chance = distanceToDrone - 100
-            this.chanceToTrackFlare = 100 - chance
+            this.chanceToTrackFlare = Math.max(0, 100 - chance - sensorData)
         }
         console.log("chanceToTrackFlare: " + this.chanceToTrackFlare.toString())
         // // Saving commented code in case future calculations need to use angles

@@ -36,6 +36,13 @@ const Canvas: Component = () => {
     let global_x = 0;
     let global_y = 0;
     let renderBuffer: renderBuffObj[] = [];
+    let sensorData = 0;
+
+    window.electronAPI.onSensorData((data) => {
+        // data contains sensor information such as position, distance, id
+        sensorData += 1
+        console.log('Sensor Data:', sensorData)
+    })
     
     // All rendering should happen in this function.
     function renderObjs(ctx) {
@@ -50,7 +57,10 @@ const Canvas: Component = () => {
             testDrone.renderOptimalFlareCircle(ctx);
             renderText(ctx, testDrone.z.toString(), testDrone.x, testDrone.y, radius + 5);
             // console.log("TestDroneAngle: " + testDrone.forwardAngle.toString() + ", " + testDrone.rearAngle.toString());
+        } else {
+            sensorData = 0
         }
+
         if (missile.alive == true) {
             missile.findNextPoint();
 
@@ -144,7 +154,7 @@ const Canvas: Component = () => {
             for (let i = 0; i < flareArr.length; i++) {
                 let flare: flareState = flareArr[i];
                 if (flare.real == true && !flare.hasBeenChecked && flare.alive == true) {
-                    missile.calculateChanceToTrackFlare(testDrone)
+                    missile.calculateChanceToTrackFlare(testDrone, sensorData)
                     flare.hasBeenChecked = true;
                     if (flare.lifespan > 0) {
                         missile.hitChance = Math.random()*100; // Determines if tracking follows flares or drone

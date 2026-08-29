@@ -64,7 +64,8 @@ function startServer(mainWindow: BrowserWindow) {
         res.send('Received POST request at /droneDetected')
         console.log("ServerQueries.ts: Received POST request at /droneDetected")
         console.log(req.body)
-        // const data = req.body
+        const data = req.body
+        mainWindow.webContents.send('sensorData', data)
     })
     testQuery();
 

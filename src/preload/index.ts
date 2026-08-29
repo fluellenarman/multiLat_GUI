@@ -23,6 +23,7 @@ if (process.contextIsolated) {
       onPing: (callback) => ipcRenderer.on('ping', (_event, data) => callback(data)),
       onReqToLaunch: (callback) => ipcRenderer.on('reqToLaunch', () => callback()),
       onReqToLauncherLoc: (callback) => ipcRenderer.on('reqToLauncherLoc', (_event, data) => callback(data)),
+      onSensorData: (callback) => ipcRenderer.on('sensorData', (_event, data) => callback(data))
     })
     
   } catch (error) {
