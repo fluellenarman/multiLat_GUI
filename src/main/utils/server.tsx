@@ -60,6 +60,12 @@ function startServer(mainWindow: BrowserWindow) {
         const data = req.body
         mainWindow.webContents.send('reqToLauncherLoc', data)     
     })
+    server.post('/droneDetected', (req, res) => {
+        res.send('Received POST request at /droneDetected')
+        console.log("ServerQueries.ts: Received POST request at /droneDetected")
+        console.log(req.body)
+        // const data = req.body
+    })
     testQuery();
 
     console.log("ServerQueries.ts: startServer() END\n")
