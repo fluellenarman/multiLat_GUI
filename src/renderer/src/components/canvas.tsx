@@ -8,6 +8,7 @@ import {
     flareArr
 } from "./flaresButton"
 import {contextBridge, ipcRenderer } from 'electron'
+import test from "node:test";
 
 interface renderBuffObj {
     x: number;
@@ -109,6 +110,7 @@ const Canvas: Component = () => {
     
     function testIntervalFoo(ctx, canvas) {
         // console.log("testIntervalFoo called");
+        console.log(canvas.width, canvas.height);
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         drawGrid(ctx, canvas);
         let obj: renderBuffObj = {
@@ -160,6 +162,11 @@ const Canvas: Component = () => {
                 flare.lifespan -= 1;
             }
             droneTracker.handleLOS_timer();
+            if (droneTracker.LOS_achieved == true) {
+                console.log("canvas.tsx: LOS achieved - loc", testDrone.x, testDrone.y);
+                // Send location to main process
+                window.rendToMainAPI.sendDroneLoc([testDrone.x, testDrone.y]);
+            }
             frameCount = 0;
         }
     }

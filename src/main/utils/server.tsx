@@ -30,6 +30,10 @@ ipcMain.on('IP-address', (event, ipAddress) => {
     console.log("Constructed URL:", url);
     testQuery2(url); // Later, will need to change the query to be a POST request with correct data.
 });
+ipcMain.on('droneLoc', (event, loc) => {
+    console.log("Received droneLoc from renderer:", loc);
+    sendDroneLocRedGUI(loc);
+});
 
 function startServer(mainWindow: BrowserWindow) {
     getLocalIPAddress();
@@ -79,6 +83,25 @@ async function testQuery2(url) {
     const data = await response.json();
     console.log(data);
     console.log("ServerQueries.ts: testQuery2() END\n")
+}
+async function sendDroneLocRedGUI(loc) {
+    const redPort = 3000
+    const localhost_url = `http://localhost:${redPort}/`
+    console.log(loc)
+    const payload = {x: loc[0], y: loc[1]};
+    console.log(payload)
+    try {
+        let targetURL = localhost_url;
+        if (localhost_url != '') { targetURL = `${localhost_url}droneLoc`; }
+        console.log(`Sending launcher location to ${targetURL}`);
+        await fetch(targetURL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        })
+    } catch (error) {
+        console.error("Error in launcherLocQuery():", error);
+    }
 }
 
 export { testFoo, startServer }

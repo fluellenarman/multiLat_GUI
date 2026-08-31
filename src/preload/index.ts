@@ -17,7 +17,8 @@ if (process.contextIsolated) {
     // one-way: renderer -> main, no response needed
     contextBridge.exposeInMainWorld('rendToMainAPI', {
       sendMessage: (data) => ipcRenderer.send('message-channel', data),
-      sendIP: (data) => ipcRenderer.send('IP-address', data)
+      sendIP: (data) => ipcRenderer.send('IP-address', data),
+      sendDroneLoc: (data) => ipcRenderer.send('droneLoc', data),
     })
     contextBridge.exposeInMainWorld('electronAPI', {
       onPing: (callback) => ipcRenderer.on('ping', (_event, data) => callback(data)),
