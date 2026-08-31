@@ -96,7 +96,7 @@ async function testQuery2(url) {
 }
 async function sendDroneLocRedGUI(loc) {
     const redPort = 3000
-    const localhost_url = `http://localhost:${redPort}/`
+    const localhost_url = `http://localhost:${redPort}/droneLoc`
     console.log(loc)
     const payload = {x: loc[0], y: loc[1]};
     console.log(payload)
