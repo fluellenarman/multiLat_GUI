@@ -67,6 +67,12 @@ function startServer(mainWindow: BrowserWindow) {
         const data = req.body
         mainWindow.webContents.send('reqToLauncherLoc', data)     
     })
+    server.post('/pingLOSLoc', (req, res) => {
+        console.log("ServerQueries.ts: Received POST request at /pingLOSLoc")
+        console.log(req.body)
+        const data = req.body
+        mainWindow.webContents.send('reqToLOSLoc', data)     
+    })
     testQuery();
 
     console.log("ServerQueries.ts: startServer() END\n")
