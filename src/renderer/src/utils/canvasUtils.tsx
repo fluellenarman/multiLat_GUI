@@ -5,6 +5,7 @@ class MissileState {
 
     launcherX: number = 500;
     launcherY: number = 500;
+    launcherShown =  false;
 
     target: droneState | flareState | null = null;
 
