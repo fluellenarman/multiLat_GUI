@@ -273,6 +273,7 @@ class DroneTracker {
     y: number = 0
     shouldDrawLine: boolean = true;
     LOS_achieved: boolean = false
+    showTracker: boolean = false
 
     LOS_default_lifetime: number = 4;
     LOS_lifetime: number = this.LOS_default_lifetime;
@@ -343,7 +344,7 @@ class DroneTracker {
     testBehavior() {
         setInterval(() => {
             this.shouldDrawLine = !this.shouldDrawLine;
-            if (this.shouldDrawLine == true)    { this.LOS_achieved = true; }
+            if (this.shouldDrawLine == true)    { this.LOS_achieved = true; this.showTracker = true }
             else                                { this.LOS_achieved = false; }
         }, 5000)
     }
