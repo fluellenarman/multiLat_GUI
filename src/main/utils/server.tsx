@@ -2,6 +2,8 @@ import express from 'express'
 import { BrowserWindow, ipcMain } from 'electron'
 import os from 'os'
 
+let networkURL = ''
+
 function getLocalIPAddress() {
   const interfaces = os.networkInterfaces();
   const addresses = [];
@@ -31,7 +33,7 @@ ipcMain.on('IP-address', (event, ipAddress) => {
     testQuery2(url); // Later, will need to change the query to be a POST request with correct data.
 });
 ipcMain.on('droneLoc', (event, loc) => {
-    console.log("Received droneLoc from renderer:", loc);
+    // console.log("Received droneLoc from renderer:", loc);
     sendDroneLocRedGUI(loc);
 });
 
@@ -51,8 +53,8 @@ function startServer(mainWindow: BrowserWindow) {
     })
     server.post('/pingLOS', (req, res) => {
         res.send('Received POST request at /')
-        console.log("ServerQueries.ts: Received POST request at /")
-        console.log("ServerQueries.ts: Request body:", req.body)
+        // console.log("ServerQueries.ts: Received POST request at /")
+        // console.log("ServerQueries.ts: Request body:", req.body)
         mainWindow.webContents.send('ping', req.body)
     })
     server.get('/pingMissileLaunch', (req, res) => {
@@ -80,9 +82,10 @@ async function testQuery() {
 }
 async function testQuery2(url) {
     const response = await fetch(url);
-    const data = await response.json();
+    const data = await response.text();
     console.log(data);
     console.log("ServerQueries.ts: testQuery2() END\n")
+    networkURL = url;
 }
 async function sendDroneLocRedGUI(loc) {
     const redPort = 3000
@@ -92,8 +95,12 @@ async function sendDroneLocRedGUI(loc) {
     console.log(payload)
     try {
         let targetURL = localhost_url;
-        if (localhost_url != '') { targetURL = `${localhost_url}droneLoc`; }
-        console.log(`Sending launcher location to ${targetURL}`);
+        console.log(networkURL)
+        if (networkURL != '') { 
+            targetURL = `${networkURL}droneLoc`; 
+            console.log("Using network URL: ", networkURL);
+        }
+        console.log(`Sending drone location to ${targetURL}`);
         await fetch(targetURL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
