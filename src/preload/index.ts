@@ -17,12 +17,14 @@ if (process.contextIsolated) {
     // one-way: renderer -> main, no response needed
     contextBridge.exposeInMainWorld('rendToMainAPI', {
       sendMessage: (data) => ipcRenderer.send('message-channel', data),
-      sendIP: (data) => ipcRenderer.send('IP-address', data)
+      sendIP: (data) => ipcRenderer.send('IP-address', data),
+      sendDroneLoc: (data) => ipcRenderer.send('droneLoc', data),
     })
     contextBridge.exposeInMainWorld('electronAPI', {
       onPing: (callback) => ipcRenderer.on('ping', (_event, data) => callback(data)),
       onReqToLaunch: (callback) => ipcRenderer.on('reqToLaunch', () => callback()),
       onReqToLauncherLoc: (callback) => ipcRenderer.on('reqToLauncherLoc', (_event, data) => callback(data)),
+      onReqToLOSLoc: (callback) => ipcRenderer.on('reqToLOSLoc', (_event, data) => callback(data)),
     })
     
   } catch (error) {

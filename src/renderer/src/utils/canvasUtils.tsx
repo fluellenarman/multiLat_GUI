@@ -5,6 +5,7 @@ class MissileState {
 
     launcherX: number = 500;
     launcherY: number = 500;
+    launcherShown =  false;
 
     target: droneState | flareState | null = null;
 
@@ -29,6 +30,8 @@ class MissileState {
     initialLifeSpan: number = 0; // initialized during launch.
     lifespan: number = 0; // is seconds. lifespan initialize in it's launch button.
     lifeCycle: number = 0; // launch, mid-course, terminal.
+    launchHeight: number = 30
+    launched: boolean = false
 
     constructor() {
         this.x = 200;
@@ -52,10 +55,12 @@ class MissileState {
 
     findNextPoint() {
         this.checkLifeCycle();
-        if (this.lifeCycle == 0) {
+        if (this.z < this.launchHeight && this.launched === false) {
             this.z += this.zSpeed;
             return;
         }
+        this.launched = true
+
         if (this.lifeCycle == 2 && this.LOSonMidcourse == false) {
             console.log("Missile in terminal phase, no LOS on target. Continuing in current direction.");
             const point = pointFromAngleAndDistance(this.x, this.y, this.curDirection, this.speed);
@@ -272,6 +277,7 @@ class DroneTracker {
     y: number = 0
     shouldDrawLine: boolean = true;
     LOS_achieved: boolean = false
+    showTracker: boolean = false
 
     LOS_default_lifetime: number = 4;
     LOS_lifetime: number = this.LOS_default_lifetime;
@@ -310,7 +316,7 @@ class DroneTracker {
     checkLOSatMidcourse(missile: MissileState) {
         if (missile.lifeCycle == 1 && this.LOS_achieved == false) { 
             missile.LOSonMidcourse = true;
-            console.log("Missile has LOS on target at mid-course");
+            // console.log("Missile has LOS on target at mid-course");
         }
     }
 
@@ -342,7 +348,7 @@ class DroneTracker {
     testBehavior() {
         setInterval(() => {
             this.shouldDrawLine = !this.shouldDrawLine;
-            if (this.shouldDrawLine == true)    { this.LOS_achieved = true; }
+            if (this.shouldDrawLine == true)    { this.LOS_achieved = true; this.showTracker = true }
             else                                { this.LOS_achieved = false; }
         }, 5000)
     }

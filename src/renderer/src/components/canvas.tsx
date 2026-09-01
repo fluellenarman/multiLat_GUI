@@ -8,6 +8,7 @@ import {
     flareArr
 } from "./flaresButton"
 import {contextBridge, ipcRenderer } from 'electron'
+import test from "node:test";
 
 interface renderBuffObj {
     x: number;
@@ -20,16 +21,26 @@ window.electronAPI.onPing((data) => {
     droneTracker.LOS_lifetime = droneTracker.LOS_default_lifetime; // Reset LOS lifetime on ping
     droneTracker.LOS_achieved = true;
     droneTracker.shouldDrawLine = true;
+    droneTracker.showTracker = true;
 })
 
 window.electronAPI.onReqToLauncherLoc((data) => {
     console.log("Received reqToLauncherLoc from main process", data);
     const launcherLoc = {
         x: data.x * 20,
-        y: -((data.y * 40) - 600)
+        y: 600 - data.y * 40
     }
     missile.launcherX = launcherLoc.x;
     missile.launcherY = launcherLoc.y;
+})
+
+window.electronAPI.onReqToLOSLoc((data) => {
+    console.log("Received reqToLOSLoc from main process", data);
+    const LOSLoc = {
+        x: data.x * 20,
+        y: 600 - data.y * 40
+    }
+    droneTracker.setCoords(LOSLoc.x, LOSLoc.y)
 })
 
 const Canvas: Component = () => {
@@ -39,9 +50,12 @@ const Canvas: Component = () => {
     
     // All rendering should happen in this function.
     function renderObjs(ctx) {
-        
-        renderRect(ctx, missile.launcherX, missile.launcherY, 10, 10);
-        drawLauncherDirection(ctx);
+        if (missile.launcherShown)
+        {
+            renderRect(ctx, missile.launcherX, missile.launcherY, 10, 10);
+            drawLauncherDirection(ctx);
+        }
+
         if (testDrone.alive == true) {
             testDrone.findNextPoint();
 
@@ -74,14 +88,14 @@ const Canvas: Component = () => {
             }
         }
         droneTracker.calculateLOSSupplement(missile);
-        droneTracker.renderDroneTracker(ctx);
-        droneTracker.drawLineTo(ctx, testDrone.x, testDrone.y);
         droneTracker.calculateQuadrant(ctx, testDrone.x, testDrone.y);
+        if (droneTracker.showTracker) {
+            droneTracker.renderDroneTracker(ctx);
+            droneTracker.drawLineTo(ctx, testDrone.x, testDrone.y);
+        }
     }
 
     function drawGrid(ctx, canvas) {
-        console.log(canvas.width, canvas.height)
-
         ctx.beginPath();
         ctx.moveTo(canvas.width * (1/3), 0);
         ctx.lineTo(canvas.width * (1/3), canvas.height);
@@ -111,6 +125,7 @@ const Canvas: Component = () => {
     
     function testIntervalFoo(ctx, canvas) {
         // console.log("testIntervalFoo called");
+        console.log(canvas.width, canvas.height);
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         drawGrid(ctx, canvas);
         let obj: renderBuffObj = {
@@ -162,6 +177,11 @@ const Canvas: Component = () => {
                 flare.lifespan -= 1;
             }
             droneTracker.handleLOS_timer();
+            if (droneTracker.LOS_achieved == true) {
+                console.log("canvas.tsx: LOS achieved - loc", testDrone.x, testDrone.y);
+                // Send location to main process
+                window.rendToMainAPI.sendDroneLoc([testDrone.x, testDrone.y]);
+            }
             frameCount = 0;
         }
     }
