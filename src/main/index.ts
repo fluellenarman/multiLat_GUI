@@ -15,8 +15,8 @@ spawnProcessAndListen();
 function createWindow(): void {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 900,
-    height: 900,
+    width: 700,
+    height: 750,
     resizable: false,
     show: false,
     autoHideMenuBar: true,

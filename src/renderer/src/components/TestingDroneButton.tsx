@@ -1,6 +1,7 @@
 //This component is to spawn in the testing drone for testing purposes. It will be used to test the drone's movement and behavior in the environment.
 
 import {Component, onMount } from 'solid-js'
+import { VsAdd } from 'solid-icons/vs'
 import { Show } from 'solid-js'
 import { testDrone } from '../utils/canvasUtils';
 import { TestingMode, setTestingMode, toggleTestingMode } from '../utils/testingMode';
@@ -80,10 +81,12 @@ const TestDroneButton: Component = () => {
 
     return (
         <div>
-            <button onClick={handleClick}>test Drone</button>
+            <button onClick={handleClick} class="icon-button drone-button">
+                <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" color="currentColor" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg" style="overflow: visible;"><path d="M10 10h4v4h-4v-4M10 10 6.5 6.5M9.96 6A3.5 3.5 0 1 0 6 9.96M14 10l3.5-3.5M18 9.96A3.5 3.5 0 1 0 14.04 6M14 14l3.5 3.5M14.04 18A3.5 3.5 0 1 0 18 14.04M10 14l-3.5 3.5M6 14.04A3.5 3.5 0 1 0 9.96 18"></path></svg>
+            </button>
             
             <Show when={TestingMode() == true}>
-                <select onChange={(event) => handleChange(event)}>
+                <select onChange={(event) => handleChange(event)} class="select-field drone-field">
                     <option value="path1">Test 1</option>
                     <option value="path2">Test 2</option>
                     <option value="path3">Test 3</option>

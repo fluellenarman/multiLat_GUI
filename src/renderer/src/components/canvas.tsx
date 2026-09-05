@@ -58,6 +58,8 @@ const Canvas: Component = () => {
         ctx.save()
         console.log(alpha)
         ctx.globalAlpha = alpha
+        ctx.fillStyle = "white";
+        ctx.strokeStyle = "white";
         renderCircle(ctx, drone_X, drone_Y, radius, alpha);
         testDrone.renderOptimalFlareCircle(ctx, drone_X, drone_Y, alpha);
         renderText(ctx, drone_Z.toString(), drone_X, drone_Y, radius + 5, alpha);
@@ -124,6 +126,8 @@ const Canvas: Component = () => {
 
     function drawGrid(ctx, canvas) {
         ctx.beginPath();
+        ctx.fillStyle = "white";
+        ctx.strokeStyle = "white";
         ctx.moveTo(canvas.width * (1/3), 0);
         ctx.lineTo(canvas.width * (1/3), canvas.height);
         ctx.moveTo(canvas.width * (2/3), 0);
@@ -135,7 +139,6 @@ const Canvas: Component = () => {
         ctx.lineTo(canvas.width, canvas.height * (2/3));
         ctx.stroke();
 
-        ctx.fillStyle = "black";
         ctx.font = "24px sans-serif";
         ctx.textBaseline = "middle";
         ctx.textAlign = "center";
@@ -294,7 +297,6 @@ const Canvas: Component = () => {
     });
     return (
         <div>
-            <p>Canvas Component</p>
             <div id="grid">
                 <canvas id="canvas"></canvas>
             </div>

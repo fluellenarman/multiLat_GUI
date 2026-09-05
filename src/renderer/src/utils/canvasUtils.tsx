@@ -377,7 +377,6 @@ function renderCircle(ctx: CanvasRenderingContext2D, x: number, y: number, radiu
     ctx.beginPath();
     // Change the divisor of z based on the units used
     ctx.arc(x, y, radius, 0, 2 * Math.PI); // x, y, radius, startAngle, endAngle
-    ctx.fillStyle = "#000000ff";
     ctx.fill();
     ctx.stroke();
 }
@@ -385,21 +384,22 @@ function renderCircle(ctx: CanvasRenderingContext2D, x: number, y: number, radiu
 function renderRedRect(ctx: CanvasRenderingContext2D, x: number, y: number) {
     ctx.beginPath();
     ctx.rect(x, y, 10, 10);
-    ctx.fillStyle = "#ff0000ff";
+    ctx.fillStyle = "red";
     ctx.fill();
     ctx.stroke();
 }
 
 function renderText(ctx: CanvasRenderingContext2D, text: string, x: number, y: number, radius: number, alpha: number = 1) {
+    ctx.fillStyle = "white";
     ctx.font = "12px Arial";
-    ctx.fillStyle = "#000000ff";
     ctx.fillText(text, x + radius, y + radius);
 }
 
 function renderRedCircle(ctx: CanvasRenderingContext2D, x: number, y: number, radius: number) {
     ctx.beginPath();
     ctx.arc(x, y, radius, 0, 2 * Math.PI); // x, y, radius, startAngle, endAngle
-    ctx.fillStyle = "#ff0000ff";
+    ctx.fillStyle = "red";
+    ctx.strokeStyle = "red";
     ctx.fill();
     ctx.stroke();
 }
@@ -407,7 +407,7 @@ function renderRedCircle(ctx: CanvasRenderingContext2D, x: number, y: number, ra
 function renderRect(ctx: CanvasRenderingContext2D, x: number, y: number, width: number, height: number) {
     ctx.beginPath();
     ctx.rect(x, y, width, height);
-    ctx.fillStyle = "#ff0000ff";
+    ctx.fillStyle = "red";
     ctx.fill();
     ctx.stroke();
 }
