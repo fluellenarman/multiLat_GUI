@@ -47,6 +47,32 @@ const Canvas: Component = () => {
     let global_x = 0;
     let global_y = 0;
     let renderBuffer: renderBuffObj[] = [];
+
+    let alpha = 1;
+    let drone_X = testDrone.x;
+    let drone_Y = testDrone.y;
+    let drone_Z = testDrone.z;
+    let radius = testDrone.z / 10 + 3;
+
+    function renderDrone(ctx) {
+        ctx.save()
+        console.log(alpha)
+        ctx.globalAlpha = alpha
+        renderCircle(ctx, drone_X, drone_Y, radius, alpha);
+        testDrone.renderOptimalFlareCircle(ctx, drone_X, drone_Y, alpha);
+        renderText(ctx, drone_Z.toString(), drone_X, drone_Y, radius + 5, alpha);
+        ctx.restore()
+
+        alpha -= 1 / 60;
+        if (alpha < 0) {
+            alpha = 1
+            drone_X = testDrone.x
+            drone_Y = testDrone.y
+            drone_Z = testDrone.z
+            radius = testDrone.z / 10 + 3;
+
+        }
+    }
     
     // All rendering should happen in this function.
     function renderObjs(ctx) {
@@ -58,11 +84,12 @@ const Canvas: Component = () => {
 
         if (testDrone.alive == true) {
             testDrone.findNextPoint();
+            renderDrone(ctx)
 
-            const radius = testDrone.z / 10 + 3;
-            renderCircle(ctx, testDrone.x, testDrone.y, radius);
-            testDrone.renderOptimalFlareCircle(ctx);
-            renderText(ctx, testDrone.z.toString(), testDrone.x, testDrone.y, radius + 5);
+            // const radius = testDrone.z / 10 + 3;
+            // renderCircle(ctx, testDrone.x, testDrone.y, radius, alpha);
+            // testDrone.renderOptimalFlareCircle(ctx);
+            // renderText(ctx, testDrone.z.toString(), testDrone.x, testDrone.y, radius + 5);
             // console.log("TestDroneAngle: " + testDrone.forwardAngle.toString() + ", " + testDrone.rearAngle.toString());
         }
         if (missile.alive == true) {
