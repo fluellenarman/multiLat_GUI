@@ -111,6 +111,8 @@ const Canvas: Component = () => {
                     flare.findNextPoint();
 
                     const radius = flare.z / 10 + 3;
+                    ctx.fillStyle = "white";
+                    ctx.strokeStyle = "white";
                     renderCircle(ctx, flare.x, flare.y, radius);
                     renderText(ctx, flare.z.toString(), flare.x, flare.y, radius + 5);
                 }
