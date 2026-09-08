@@ -215,9 +215,9 @@ class droneState {
 
     // Render optimal flare circle. 
     // This is a visual aid for the user to see which distance the flares/chaffs will be most effect
-    renderOptimalFlareCircle(ctx: CanvasRenderingContext2D) {
+    renderOptimalFlareCircle(ctx: CanvasRenderingContext2D, x, y, alpha: number = 1) {
         ctx.beginPath();
-        ctx.arc(this.x, this.y, 100, 0, 2 * Math.PI);
+        ctx.arc(x, y, 100, 0, 2 * Math.PI);
         ctx.stroke();
     }
 }
@@ -373,7 +373,7 @@ function utilFoo() {
 
 
 // Same as drawCircle but without logic.
-function renderCircle(ctx: CanvasRenderingContext2D, x: number, y: number, radius: number) {
+function renderCircle(ctx: CanvasRenderingContext2D, x: number, y: number, radius: number, alpha: number = 1) {
     ctx.beginPath();
     // Change the divisor of z based on the units used
     ctx.arc(x, y, radius, 0, 2 * Math.PI); // x, y, radius, startAngle, endAngle
@@ -390,11 +390,10 @@ function renderRedRect(ctx: CanvasRenderingContext2D, x: number, y: number) {
     ctx.stroke();
 }
 
-function renderText(ctx: CanvasRenderingContext2D, text: string, x: number, y: number, radius: number) {
+function renderText(ctx: CanvasRenderingContext2D, text: string, x: number, y: number, radius: number, alpha: number = 1) {
     ctx.font = "12px Arial";
     ctx.fillStyle = "#000000ff";
     ctx.fillText(text, x + radius, y + radius);
-
 }
 
 function renderRedCircle(ctx: CanvasRenderingContext2D, x: number, y: number, radius: number) {
