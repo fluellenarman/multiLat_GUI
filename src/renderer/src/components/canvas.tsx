@@ -151,6 +151,7 @@ const Canvas: Component = () => {
             if (missile.alive == true) {
                 console.log("Missile lifespan: " + missile.lifespan.toString());
                 missile.lifespan -= 1;
+                window.rendToMainAPI.sendMissileLoc([missile.x, missile.y]);
                 if (missile.lifespan <= 0) {
                     missile.alive = false;
                     console.log("Missile expired");

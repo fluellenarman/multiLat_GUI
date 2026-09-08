@@ -36,6 +36,10 @@ ipcMain.on('droneLoc', (event, loc) => {
     // console.log("Received droneLoc from renderer:", loc);
     sendDroneLocRedGUI(loc);
 });
+ipcMain.on('missileLoc', (event, loc) => {
+    // console.log("Received missileLoc from renderer:", loc);
+    sendMissileLocRedGUI(loc);
+});
 
 function startServer(mainWindow: BrowserWindow) {
     getLocalIPAddress();
@@ -97,7 +101,6 @@ async function testQuery2(url) {
 async function sendDroneLocRedGUI(loc) {
     const redPort = 3000
     const localhost_url = `http://localhost:${redPort}/droneLoc`
-    console.log(loc)
     const payload = {x: loc[0], y: loc[1]};
     console.log(payload)
     try {
@@ -105,6 +108,30 @@ async function sendDroneLocRedGUI(loc) {
         console.log(networkURL)
         if (networkURL != '') { 
             targetURL = `${networkURL}droneLoc`; 
+            console.log("Using network URL: ", networkURL);
+        }
+        console.log(`Sending drone location to ${targetURL}`);
+        await fetch(targetURL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        })
+    } catch (error) {
+        console.error("Error in launcherLocQuery():", error);
+    }
+}
+async function sendMissileLocRedGUI(loc) {
+    const redPort = 3000
+    const localhost_url = `http://localhost:${redPort}/missileLoc`
+    console.log(loc)
+    const payload = {x: loc[0], y: loc[1]};
+    console.log('sendMissileLocRedGUI')
+    console.log(payload, '\n')
+    try {
+        let targetURL = localhost_url;
+        console.log(networkURL)
+        if (networkURL != '') { 
+            targetURL = `${networkURL}missileLoc`; 
             console.log("Using network URL: ", networkURL);
         }
         console.log(`Sending drone location to ${targetURL}`);

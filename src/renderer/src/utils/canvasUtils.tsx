@@ -314,7 +314,7 @@ class DroneTracker {
     }
 
     checkLOSatMidcourse(missile: MissileState) {
-        if (missile.lifeCycle == 1 && this.LOS_achieved == false) { 
+        if (missile.lifeCycle == 1 && this.LOS_achieved == true) { 
             missile.LOSonMidcourse = true;
             // console.log("Missile has LOS on target at mid-course");
         }
