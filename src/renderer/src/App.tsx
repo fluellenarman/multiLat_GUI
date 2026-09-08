@@ -15,13 +15,14 @@ const App: Component = () => {
 
   return (
     <>
-      <p>Hello World</p>
-      <TestDroneButton />
-      <Show when={TestingMode() == true}>
-        <LaunchMissileButton />
-      </Show>
-      <FlareButton />
-      <IP_addressInput />
+      <div class="button-row">
+        <TestDroneButton />
+        <Show when={TestingMode() == true}>
+          <LaunchMissileButton />
+        </Show>
+        <FlareButton />
+        <IP_addressInput />
+      </div>
       <Canvas />
       {/* <Versions /> */}
     </>
