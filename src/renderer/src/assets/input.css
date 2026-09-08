@@ -1,0 +1,150 @@
+.button-row {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  padding: 10px;
+  gap: 10px;
+}
+
+.text-field,
+.select-field {
+  box-sizing: border-box;
+
+  height: 32px;
+  padding: 0 10px;
+
+  border: 1px solid var(--color-neutral);
+  border-radius: 6px;
+
+  background-color: var(--color-background-soft);
+  color: var(--color-text);
+
+  font-family: inherit;
+  font-size: 14px;
+
+  outline: none;
+
+  transition:
+    border-color 150ms ease,
+    background-color 150ms ease,
+    color 150ms ease,
+    box-shadow 150ms ease;
+}
+
+.text-field::placeholder,
+.select-field::placeholder {
+  color: var(--color-text);
+  opacity: 0.45;
+}
+
+/* .text-field:hover,
+.select-field:hover {
+  border-color: var(--color-primary);
+} */
+
+/* .text-field:focus,
+.select-field:focus {
+  border-color: var(--color-primary);
+
+  box-shadow:
+    0 0 0 2px
+    color-mix(
+      in oklch,
+      var(--color-primary) 20%,
+      transparent
+    );
+}
+
+/* Dropdown */
+
+.select-field {
+  padding-right: 28px;
+  cursor: pointer;
+}
+
+.select-field option {
+  background-color: var(--color-background-soft);
+  color: var(--color-text);
+}
+
+.icon-button {
+  width: 32px;
+  height: 32px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
+
+  border: 1px solid;
+  border-radius: 6px;
+
+  background: transparent;
+
+  cursor: pointer;
+
+  transition:
+    background-color 150ms ease,
+    color 150ms ease;
+}
+
+.icon-button svg {
+  box-sizing: border-box;
+}
+
+.add-button {
+  color: var(--color-success);
+  border-color: var(--color-success);
+}
+
+.add-button:hover {
+  background-color: var(--color-success);
+  color: var(--color-success-content);
+}
+
+.add-field {
+    border-color: var(--color-success);
+}
+
+.add-field:hover {
+    background-color: var(--color-success-content);
+}
+
+.drone-button {
+  color: var(--color-info);
+  border-color: var(--color-info);
+}
+
+.drone-button:hover {
+  background-color: var(--color-info);
+  color: var(--color-info-content);
+}
+
+.drone-field {
+    border-color: var(--color-info);
+}
+
+.drone-field:hover {
+    background-color: var(--color-info-content);
+}
+
+.launch-button {
+  color: var(--color-error);
+  border-color: var(--color-error);
+}
+
+.launch-button:hover {
+  background-color: var(--color-error);
+  color: var(--color-error-content);
+}
+
+.flare-button {
+  color: var(--color-warning);
+  border-color: var(--color-warning);
+}
+
+.flare-button:hover {
+  background-color: var(--color-warning);
+  color: var(--color-warning-content);
+}
