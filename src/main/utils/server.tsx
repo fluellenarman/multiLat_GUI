@@ -56,7 +56,8 @@ function startServer(mainWindow: BrowserWindow) {
         console.log("ServerQueries.ts: Received GET request at /")
     })
     server.post('/pingLOS', (req, res) => {
-        res.send('Received POST request at /')
+        res.send('Received POST request at /pingLOS')
+        sendLOS_pingRedGUI();
         // console.log("ServerQueries.ts: Received POST request at /")
         // console.log("ServerQueries.ts: Request body:", req.body)
         mainWindow.webContents.send('ping', req.body)
@@ -139,6 +140,26 @@ async function sendMissileLocRedGUI(loc) {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
+        })
+    } catch (error) {
+        console.error("Error in launcherLocQuery():", error);
+    }
+}
+async function sendLOS_pingRedGUI() {
+    const redPort = 3000
+    const localhost_url = `http://localhost:${redPort}/LOS-ping`
+    console.log('sendLOS_pingRedGUI')
+    try {
+        let targetURL = localhost_url;
+        console.log(networkURL)
+        if (networkURL != '') { 
+            targetURL = `${networkURL}LOS-ping`; 
+            console.log("Using network URL: ", networkURL);
+        }
+        console.log(`Sending LOS ping to ${targetURL}`);
+        await fetch(targetURL, {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' },
         })
     } catch (error) {
         console.error("Error in launcherLocQuery():", error);
