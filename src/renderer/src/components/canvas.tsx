@@ -97,9 +97,10 @@ const Canvas: Component = () => {
         if (missile.alive == true) {
             missile.findNextPoint();
 
+            const opacity = missile.calculateFadeout();
             const radius = missile.z / 10 + 3;
-            renderRedCircle(ctx, missile.x, missile.y, radius);
-            renderText(ctx, missile.z.toString(), missile.x, missile.y, radius + 5);
+            renderRedCircle(ctx, missile.renderedX, missile.renderedY, radius, opacity);
+            renderText(ctx, missile.renderedZ.toString(), missile.renderedX, missile.renderedY, radius + 5, opacity);
         }
         if (flareArr.length > 0) {
             for (let i = flareArr.length - 1; i >= 0; i--) {
@@ -166,7 +167,7 @@ const Canvas: Component = () => {
             id: "test1"
         }
         // renderBuffer.push(obj);
-        secTriggerCheck();
+        secTriggerCheck(ctx);
         requestAnimationFrame(() => renderObjs(ctx));
 
         global_x += 1;
@@ -175,7 +176,7 @@ const Canvas: Component = () => {
 
     
     let frameCount = 0
-    function secTriggerCheck() {
+    function secTriggerCheck(ctx) {
         frameCount += 1;
         if (frameCount >= 30) {
             // console.log("TestDrone forward angle: ", testDrone.forwardAngle)

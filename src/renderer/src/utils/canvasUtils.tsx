@@ -3,6 +3,10 @@ class MissileState {
     y: number;
     z: number;
 
+    renderedX: number = 0;
+    renderedY: number = 0;
+    renderedZ: number = 0;
+
     launcherX: number = 500;
     launcherY: number = 500;
     launcherShown =  false;
@@ -27,16 +31,36 @@ class MissileState {
     speed: number = 2;
     
     alive: boolean = false;
-    initialLifeSpan: number = 0; // initialized during launch.
+    initialLifeSpan: number = 9; // initialized here, no longer at launch.
     lifespan: number = 0; // is seconds. lifespan initialize in it's launch button.
     lifeCycle: number = 0; // launch, mid-course, terminal.
     launchHeight: number = 30
     launched: boolean = false
 
+    fadeOutTimerMax: number = 30;
+    fadeOutTimer: number = this.fadeOutTimerMax
+    fadeOutTimerMinStay: number = 5;
+
     constructor() {
         this.x = 200;
         this.y = 200;
         this.z = 5;
+    }
+
+    calculateFadeout() {
+        this.fadeOutTimer -= 1
+        if (this.fadeOutTimer < -this.fadeOutTimerMinStay) {
+            this.fadeOutTimer = this.fadeOutTimerMax
+            this.setRenderedCoords()
+        }
+
+        return this.fadeOutTimer / this.fadeOutTimerMax
+    }
+
+    setRenderedCoords() {
+        this.renderedX = this.x;
+        this.renderedY = this.y;
+        this.renderedZ = this.z;
     }
 
     checkLifeCycle() {
@@ -390,16 +414,20 @@ function renderRedRect(ctx: CanvasRenderingContext2D, x: number, y: number) {
 }
 
 function renderText(ctx: CanvasRenderingContext2D, text: string, x: number, y: number, radius: number, alpha: number = 1) {
-    ctx.fillStyle = "white";
+    let rgbString = "rgba(255, 255, 255," + alpha.toString() + ")";
+
+    ctx.fillStyle = rgbString;
     ctx.font = "12px Arial";
     ctx.fillText(text, x + radius, y + radius);
 }
 
-function renderRedCircle(ctx: CanvasRenderingContext2D, x: number, y: number, radius: number) {
+function renderRedCircle(ctx: CanvasRenderingContext2D, x: number, y: number, radius: number, opacity: number) {
     ctx.beginPath();
+    let rgbString = "rgba(253, 0, 0," + opacity.toString() + ")";
+    console.log(rgbString)
     ctx.arc(x, y, radius, 0, 2 * Math.PI); // x, y, radius, startAngle, endAngle
-    ctx.fillStyle = "red";
-    ctx.strokeStyle = "red";
+    ctx.fillStyle = rgbString;
+    ctx.strokeStyle = rgbString;
     ctx.fill();
     ctx.stroke();
 }
