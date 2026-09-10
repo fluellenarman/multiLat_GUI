@@ -3,7 +3,7 @@ import { electronAPI } from '@electron-toolkit/preload'
 
 // Custom APIs for renderer
 const api = {
-    onSerialData: (callback) => ipcRenderer.on('serial-data', (_event, data) => callback(data))
+  onSerialData: (callback) => ipcRenderer.on('serial-data', (_event, data) => callback(data))
 }
 
 // Use `contextBridge` APIs to expose Electron APIs to
@@ -20,14 +20,15 @@ if (process.contextIsolated) {
       sendIP: (data) => ipcRenderer.send('IP-address', data),
       sendDroneLoc: (data) => ipcRenderer.send('droneLoc', data),
       sendMissileLoc: (data) => ipcRenderer.send('missileLoc', data),
+      sendMissileHit: () => ipcRenderer.send('missileHit')
     })
     contextBridge.exposeInMainWorld('electronAPI', {
       onPing: (callback) => ipcRenderer.on('ping', (_event, data) => callback(data)),
       onReqToLaunch: (callback) => ipcRenderer.on('reqToLaunch', () => callback()),
-      onReqToLauncherLoc: (callback) => ipcRenderer.on('reqToLauncherLoc', (_event, data) => callback(data)),
-      onReqToLOSLoc: (callback) => ipcRenderer.on('reqToLOSLoc', (_event, data) => callback(data)),
+      onReqToLauncherLoc: (callback) =>
+        ipcRenderer.on('reqToLauncherLoc', (_event, data) => callback(data)),
+      onReqToLOSLoc: (callback) => ipcRenderer.on('reqToLOSLoc', (_event, data) => callback(data))
     })
-    
   } catch (error) {
     console.error(error)
   }
