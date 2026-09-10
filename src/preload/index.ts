@@ -27,6 +27,9 @@ if (process.contextIsolated) {
       onReqToLaunch: (callback) => ipcRenderer.on('reqToLaunch', () => callback()),
       onReqToLauncherLoc: (callback) => ipcRenderer.on('reqToLauncherLoc', (_event, data) => callback(data)),
       onReqToLOSLoc: (callback) => ipcRenderer.on('reqToLOSLoc', (_event, data) => callback(data)),
+      onIPforHTML: (callback) => ipcRenderer.on('reqIP-for-HTML', (_event, data) => callback(data)),
+      
+      getLocalIP: () => ipcRenderer.invoke('get-local-ip'),
     })
     
   } catch (error) {

@@ -153,7 +153,7 @@ const Canvas: Component = () => {
     
     function testIntervalFoo(ctx, canvas) {
         // console.log("testIntervalFoo called");
-        console.log(canvas.width, canvas.height);
+        // console.log(canvas.width, canvas.height);
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         drawGrid(ctx, canvas);
         let obj: renderBuffObj = {

@@ -17,14 +17,20 @@ function getLocalIPAddress() {
     }
   }
 
+  const selfIP_address = addresses[0]?.address
+  console.log(addresses);
   console.log("from server, addresses:\n",addresses[0]?.address, '\n');
   console.log(`http://${addresses[0]?.address}:3003/`);
+  return selfIP_address;
 }
 
 function testFoo() {
     console.log("server.tsx: testFoo called");
 }
 
+ipcMain.handle('get-local-ip', () => {
+  return getLocalIPAddress()
+})
 ipcMain.on('IP-address', (event, ipAddress) => {
     console.log("Received IP address from renderer:", ipAddress);
     const redPort = 3000
@@ -59,10 +65,19 @@ ipcMain.on('flarePing', (event, data) => {
 });
 
 function startServer(mainWindow: BrowserWindow) {
-    getLocalIPAddress();
+    const selfIP_address = getLocalIPAddress();
     const server = express()
     const port = 3003
     server.use(express.json())
+
+    console.log("server.tsx: startServer(): reqIP-for-HTML: ", selfIP_address)
+    if (mainWindow.webContents.isLoading()) {
+        mainWindow.webContents.once('did-finish-load', () => {
+            mainWindow.webContents.send('reqIP-for-HTML', selfIP_address)
+        })
+    } else {
+        mainWindow.webContents.send('reqIP-for-HTML', selfIP_address)
+    }
 
     server.listen(port, () => {
         console.log(`ServerQueries.ts: Server is running on http://localhost:${port}`)
