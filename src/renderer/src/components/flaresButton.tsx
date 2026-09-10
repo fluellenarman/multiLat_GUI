@@ -74,6 +74,7 @@ const FlareButton: Component = () => {
 
     function handleClick() {
         console.log("Flare button clicked1");
+        window.rendToMainAPI.sendFlarePing();
         // for (let i = 0; i < 5; i++) {
         const interval = setInterval(() => handleFrame(interval), 30)
         // }

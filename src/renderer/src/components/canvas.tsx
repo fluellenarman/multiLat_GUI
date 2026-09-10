@@ -88,11 +88,6 @@ const Canvas: Component = () => {
             testDrone.findNextPoint();
             renderDrone(ctx)
 
-            // const radius = testDrone.z / 10 + 3;
-            // renderCircle(ctx, testDrone.x, testDrone.y, radius, alpha);
-            // testDrone.renderOptimalFlareCircle(ctx);
-            // renderText(ctx, testDrone.z.toString(), testDrone.x, testDrone.y, radius + 5);
-            // console.log("TestDroneAngle: " + testDrone.forwardAngle.toString() + ", " + testDrone.rearAngle.toString());
         }
         if (missile.alive == true) {
             missile.findNextPoint();
