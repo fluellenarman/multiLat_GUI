@@ -93,6 +93,11 @@
   box-sizing: border-box;
 }
 
+.icon-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .add-button {
   color: var(--color-success);
   border-color: var(--color-success);
@@ -144,7 +149,28 @@
   border-color: var(--color-warning);
 }
 
-.flare-button:hover {
+.flare-button:hover:not(:disabled) {
   background-color: var(--color-warning);
   color: var(--color-warning-content);
+}
+
+.notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 12px 20px;
+  border-radius: 8px;
+  color: white;
+  font-weight: 500;
+  z-index: 1000;
+  transform: translateX(100%);
+  transition: transform 0.3s ease;
+}
+
+.notification.success {
+  background-color: #48bb78;
+}
+
+.notification.error {
+  background-color: #f56565;
 }
