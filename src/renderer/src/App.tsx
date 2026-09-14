@@ -24,13 +24,17 @@ const App: Component = () => {
       }
     }).catch((e) => console.warn('getLocalIP failed', e))
   })
+  const isTestMode = () => import.meta.env.VITE_TEST_MODE === 'true'
+
 
   return (
     <>
       <div class="button-row">
         <p>{selfIPaddress()}</p>
-        <TestDroneButton />
-        <Show when={TestingMode() == true}>
+        <Show when={isTestMode() === true}>
+          <TestDroneButton />
+        </Show>
+        <Show when={TestingMode() === true}>
           <LaunchMissileButton />
         </Show>
         <FlareButton />
