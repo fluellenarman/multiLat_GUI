@@ -1,9 +1,10 @@
 import express from 'express'
 import { BrowserWindow, ipcMain } from 'electron'
 import os from 'os'
+import {colorPrint} from './logging'
 
 let networkURL = ''
-
+let gWindow: BrowserWindow;
 function getLocalIPAddress() {
   const interfaces = os.networkInterfaces();
   const addresses = [];
@@ -69,6 +70,7 @@ function startServer(mainWindow: BrowserWindow) {
     const server = express()
     const port = 3003
     server.use(express.json())
+    gWindow = mainWindow;
 
     console.log("server.tsx: startServer(): reqIP-for-HTML: ", selfIP_address)
     if (mainWindow.webContents.isLoading()) {
@@ -124,12 +126,21 @@ async function testQuery() {
     console.log(data);
     console.log("ServerQueries.ts: testQuery() END\n")
 }
+
 async function testQuery2(url) {
-    const response = await fetch(url);
-    const data = await response.text();
-    console.log(data);
-    console.log("ServerQueries.ts: testQuery2() END\n")
-    networkURL = url;
+    gWindow.webContents.send('sendIP-feedback', "progress")
+    colorPrint("yellow", "ServerQueries.ts: testQuery2(): Calling url: ", url)
+    try {
+        await fetch(url, {
+            method: 'GET',
+        });
+        colorPrint("green", "ServerQueries.ts: testQuery2(): successful GET request to ", url);
+        gWindow.webContents.send('sendIP-feedback', "success")
+    } catch (error) {
+        // console.log("ServerQueries.ts: testQuery2() error: ", error);
+        colorPrint("red", "ServerQueries.ts: testQuery2() error: ", error);
+        gWindow.webContents.send('sendIP-feedback', "failed")
+    }
 }
 async function sendDroneLocRedGUI(loc) {
     const redPort = 3000
