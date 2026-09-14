@@ -1,5 +1,27 @@
+import os from 'os'
 import dgram from 'dgram'
 import { DiscoveryMessage } from './types'
+
+function getLocalAddresses() {
+  const interfaces = os.networkInterfaces()
+
+  return Object.entries(interfaces).flatMap(([name, addresses]) =>
+    (addresses ?? [])
+      .filter((iface) => iface.family === 'IPv4' && !iface.internal)
+      .map((iface) => ({
+        name,
+        address: iface.address,
+        netmask: iface.netmask
+      }))
+  )
+}
+
+function getBroadcastAddress(address: string, netmask: string) {
+  const ip = address.split('.').map(Number)
+  const mask = netmask.split('.').map(Number)
+
+  return ip.map((octet, i) => octet | (~mask[i] & 255)).join('.')
+}
 
 export class Discovery {
   // Add new device ids here
@@ -9,15 +31,14 @@ export class Discovery {
   peers = new Map<string, string>()
 
   constructor(
-    private readonly broadcastAddress = '255.255.255.255',
-    private readonly port = 41234,
     private readonly id = 'blue-gui',
+    private readonly port = 41234,
     private readonly httpPort = 3003
   ) {}
 
   start() {
     this.socket.on('message', (data, rinfo) => {
-      console.log(`[${this.id}] RECEIVED UDP`, data.toString(), rinfo.address, rinfo.port)
+      console.log(`[${this.id}] message`, data.toString(), rinfo.address, rinfo.port)
 
       this.handleMessage(data, rinfo)
     })
@@ -36,8 +57,6 @@ export class Discovery {
 
     this.socket.bind(this.port, () => {
       this.socket.setBroadcast(true)
-      console.log(`Discovery listening on UDP ${this.port}`)
-
       this.broadcast()
     })
   }
@@ -49,17 +68,18 @@ export class Discovery {
       port: this.httpPort
     }
 
+    const data = Buffer.from(JSON.stringify(message))
     const broadcastInterval = setInterval(() => {
       if (this.devices.size == this.peers.size) {
         clearInterval(broadcastInterval)
-        console.log('All peers discovered')
+        console.log('All peers discovered: ', this.devices.size)
         return
       }
 
-      console.log('Broadcasting ip')
-
-      const data = Buffer.from(JSON.stringify(message))
-      this.socket.send(data, this.port, this.broadcastAddress)
+      for (const iface of getLocalAddresses()) {
+        const broadcast = getBroadcastAddress(iface.address, iface.netmask)
+        this.socket.send(data, this.port, broadcast)
+      }
     }, 5000)
   }
 
@@ -93,7 +113,6 @@ export class Discovery {
 
     const ip = `${rinfo.address}:${message.port}`
     this.peers.set(message.id, ip)
-    console.log('Discovered: ', message.id, ip)
   }
 
   private handleRequest(rinfo: dgram.RemoteInfo) {

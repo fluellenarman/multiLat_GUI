@@ -69,8 +69,6 @@ function startServer(mainWindow: BrowserWindow) {
   const discovery = new Discovery()
   discovery.start()
 
-  setInterval(() => console.log('From Server: ', discovery.peers.get('blue-gui')), 5000)
-
   const selfIP_address = getLocalIPAddress()
   const server = express()
   const port = 3003
