@@ -13,11 +13,16 @@ import './assets/canvas.css'
 const App: Component = () => {
   const ipcHandle = (): void => window.electron.ipcRenderer.send('ping')
 
+  const isTestMode = () => import.meta.env.VITE_TEST_MODE === 'true'
+
+
   return (
     <>
       <div class="button-row">
-        <TestDroneButton />
-        <Show when={TestingMode() == true}>
+        <Show when={isTestMode() === true}>
+          <TestDroneButton />
+        </Show>
+        <Show when={TestingMode() === true}>
           <LaunchMissileButton />
         </Show>
         <FlareButton />
