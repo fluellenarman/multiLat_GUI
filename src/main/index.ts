@@ -60,7 +60,7 @@ function createWindow(): void {
   // Express Server for testing (Receiving test Serial data)
   const server = express();
   server.use(express.json());
-  server.listen(3000, () => console.log('Listening on port 3000 for test serial data...'));
+  server.listen(3004, () => console.log('Listening on port 3000 for test serial data...'));
 
   server.post('/send', (req, res) => {
     console.log(req.body.data);

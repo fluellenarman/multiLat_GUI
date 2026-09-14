@@ -20,12 +20,16 @@ if (process.contextIsolated) {
       sendIP: (data) => ipcRenderer.send('IP-address', data),
       sendDroneLoc: (data) => ipcRenderer.send('droneLoc', data),
       sendMissileLoc: (data) => ipcRenderer.send('missileLoc', data),
+      sendFlarePing: (data) => ipcRenderer.send('flarePing', data),
     })
     contextBridge.exposeInMainWorld('electronAPI', {
       onPing: (callback) => ipcRenderer.on('ping', (_event, data) => callback(data)),
       onReqToLaunch: (callback) => ipcRenderer.on('reqToLaunch', () => callback()),
       onReqToLauncherLoc: (callback) => ipcRenderer.on('reqToLauncherLoc', (_event, data) => callback(data)),
       onReqToLOSLoc: (callback) => ipcRenderer.on('reqToLOSLoc', (_event, data) => callback(data)),
+      onIPforHTML: (callback) => ipcRenderer.on('reqIP-for-HTML', (_event, data) => callback(data)),
+      
+      getLocalIP: () => ipcRenderer.invoke('get-local-ip'),
     })
     
   } catch (error) {

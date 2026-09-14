@@ -68,6 +68,8 @@
 }
 
 .icon-button {
+  position: relative;
+
   width: 32px;
   height: 32px;
 
@@ -89,8 +91,69 @@
     color 150ms ease;
 }
 
+/* Tooltip */
+.icon-button::after {
+  content: attr(data-tooltip);
+
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 8px);
+
+  transform: translateX(-50%);
+
+  padding: 5px 8px;
+
+  border-radius: 5px;
+
+  background: var(--color-text);
+  color: var(--color-background);
+
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+
+  transition:
+    opacity 150ms ease,
+    visibility 150ms ease;
+}
+
+.icon-button::before {
+  content: "";
+
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 3px);
+
+  transform: translateX(-50%);
+
+  border: 5px solid transparent;
+  border-top-color: var(--color-text);
+
+  opacity: 0;
+  visibility: hidden;
+
+  transition:
+    opacity 150ms ease,
+    visibility 150ms ease;
+}
+
+.icon-button:hover::after,
+.icon-button:hover::before {
+  opacity: 1;
+  visibility: visible;
+}
+
 .icon-button svg {
   box-sizing: border-box;
+}
+
+.icon-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .add-button {
@@ -144,7 +207,28 @@
   border-color: var(--color-warning);
 }
 
-.flare-button:hover {
+.flare-button:hover:not(:disabled) {
   background-color: var(--color-warning);
   color: var(--color-warning-content);
+}
+
+.notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 12px 20px;
+  border-radius: 8px;
+  color: white;
+  font-weight: 500;
+  z-index: 1000;
+  transform: translateX(100%);
+  transition: transform 0.3s ease;
+}
+
+.notification.success {
+  background-color: #48bb78;
+}
+
+.notification.error {
+  background-color: #f56565;
 }

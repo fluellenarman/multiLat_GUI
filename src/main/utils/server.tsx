@@ -17,14 +17,20 @@ function getLocalIPAddress() {
     }
   }
 
+  const selfIP_address = addresses[0]?.address
+  console.log(addresses);
   console.log("from server, addresses:\n",addresses[0]?.address, '\n');
   console.log(`http://${addresses[0]?.address}:3003/`);
+  return selfIP_address;
 }
 
 function testFoo() {
     console.log("server.tsx: testFoo called");
 }
 
+ipcMain.handle('get-local-ip', () => {
+  return getLocalIPAddress()
+})
 ipcMain.on('IP-address', (event, ipAddress) => {
     console.log("Received IP address from renderer:", ipAddress);
     const redPort = 3000
@@ -40,12 +46,38 @@ ipcMain.on('missileLoc', (event, loc) => {
     // console.log("Received missileLoc from renderer:", loc);
     sendMissileLocRedGUI(loc);
 });
+ipcMain.on('flarePing', (event, data) => {
+    console.log("Server.tsx: Received flarePing from renderer:");
+
+    let intervalCount = 0;
+    const intervalMax = 4;
+
+    const id = setInterval(() => {
+        intervalCount++;
+        sendFlarePingRedGUI();
+
+        if (intervalCount >= intervalMax) {
+            intervalCount = 0;
+            clearInterval(id);
+        }
+    }, 1000)
+    // sendFlarePingRedGUI();
+});
 
 function startServer(mainWindow: BrowserWindow) {
-    getLocalIPAddress();
+    const selfIP_address = getLocalIPAddress();
     const server = express()
     const port = 3003
     server.use(express.json())
+
+    console.log("server.tsx: startServer(): reqIP-for-HTML: ", selfIP_address)
+    if (mainWindow.webContents.isLoading()) {
+        mainWindow.webContents.once('did-finish-load', () => {
+            mainWindow.webContents.send('reqIP-for-HTML', selfIP_address)
+        })
+    } else {
+        mainWindow.webContents.send('reqIP-for-HTML', selfIP_address)
+    }
 
     server.listen(port, () => {
         console.log(`ServerQueries.ts: Server is running on http://localhost:${port}`)
@@ -56,7 +88,8 @@ function startServer(mainWindow: BrowserWindow) {
         console.log("ServerQueries.ts: Received GET request at /")
     })
     server.post('/pingLOS', (req, res) => {
-        res.send('Received POST request at /')
+        // res.send('Received POST request at /pingLOS')
+        sendLOS_pingRedGUI();
         // console.log("ServerQueries.ts: Received POST request at /")
         // console.log("ServerQueries.ts: Request body:", req.body)
         mainWindow.webContents.send('ping', req.body)
@@ -68,13 +101,13 @@ function startServer(mainWindow: BrowserWindow) {
     server.post('/pingLauncherLoc', (req, res) => {
         res.send('Received POST request at /pingLauncherLoc')
         console.log("ServerQueries.ts: Received POST request at /pingLauncherLoc")
-        console.log(req.body)
+        // console.log(req.body)
         const data = req.body
         mainWindow.webContents.send('reqToLauncherLoc', data)     
     })
     server.post('/pingLOSLoc', (req, res) => {
         console.log("ServerQueries.ts: Received POST request at /pingLOSLoc")
-        console.log(req.body)
+        // console.log(req.body)
         const data = req.body
         mainWindow.webContents.send('reqToLOSLoc', data)     
     })
@@ -102,22 +135,22 @@ async function sendDroneLocRedGUI(loc) {
     const redPort = 3000
     const localhost_url = `http://localhost:${redPort}/droneLoc`
     const payload = {x: loc[0], y: loc[1]};
-    console.log(payload)
+    // console.log(payload)
     try {
         let targetURL = localhost_url;
-        console.log(networkURL)
+        // console.log(networkURL)
         if (networkURL != '') { 
-            targetURL = `${networkURL}droneLoc`; 
+            targetURL = `${networkURL}/droneLoc`; 
             console.log("Using network URL: ", networkURL);
         }
-        console.log(`Sending drone location to ${targetURL}`);
+        // console.log(`Sending drone location to ${targetURL}`);
         await fetch(targetURL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         })
     } catch (error) {
-        console.error("Error in launcherLocQuery():", error);
+        // console.error("Error in launcherLocQuery():", error);
     }
 }
 async function sendMissileLocRedGUI(loc) {
@@ -126,10 +159,10 @@ async function sendMissileLocRedGUI(loc) {
     console.log(loc)
     const payload = {x: loc[0], y: loc[1]};
     console.log('sendMissileLocRedGUI')
-    console.log(payload, '\n')
+    // console.log(payload)
     try {
         let targetURL = localhost_url;
-        console.log(networkURL)
+        // console.log(networkURL)
         if (networkURL != '') { 
             targetURL = `${networkURL}missileLoc`; 
             console.log("Using network URL: ", networkURL);
@@ -141,7 +174,47 @@ async function sendMissileLocRedGUI(loc) {
             body: JSON.stringify(payload)
         })
     } catch (error) {
-        console.error("Error in launcherLocQuery():", error);
+        // console.error("Error in launcherLocQuery():", error);
+    }
+}
+async function sendLOS_pingRedGUI() {
+    const redPort = 3000
+    const localhost_url = `http://localhost:${redPort}/LOS-ping`
+    // console.log('sendLOS_pingRedGUI')
+    try {
+        let targetURL = localhost_url;
+        // console.log(networkURL)
+        if (networkURL != '') { 
+            targetURL = `${networkURL}LOS-ping`; 
+            console.log("Using network URL: ", networkURL);
+        }
+        // console.log(`Sending LOS ping to ${targetURL}`);
+        await fetch(targetURL, {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' },
+        })
+    } catch (error) {
+        // console.error("Error in launcherLocQuery():", error);
+    }
+}
+async function sendFlarePingRedGUI() {
+    const redPort = 3000
+    const localhost_url = `http://localhost:${redPort}/FlarePing`
+    console.log('server.tsx: sendLOS_pingRedGUI')
+    try {
+        let targetURL = localhost_url;
+        // console.log(networkURL)
+        if (networkURL != '') { 
+            targetURL = `${networkURL}FlarePing`; 
+            console.log("Using network URL: ", networkURL);
+        }
+        // console.log(`Sending LOS ping to ${targetURL}`);
+        await fetch(targetURL, {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' },
+        })
+    } catch (error) {
+        // console.error("Error in launcherLocQuery():", error);
     }
 }
 

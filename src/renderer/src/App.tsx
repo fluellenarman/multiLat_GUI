@@ -1,5 +1,5 @@
 import type { Component } from 'solid-js'
-import { Show } from 'solid-js'
+import { Show, createSignal, onMount } from 'solid-js'
 import Versions from './components/Versions'
 import Canvas from './components/canvas'
 import LaunchMissileButton from './components/launchMissileButton'
@@ -13,11 +13,28 @@ import './assets/canvas.css'
 const App: Component = () => {
   const ipcHandle = (): void => window.electron.ipcRenderer.send('ping')
 
+  const [selfIPaddress, setSelfIPaddress] = createSignal('')
+
+  onMount(() => {
+    // also explicitly request the IP from main to avoid race
+    window.electronAPI.getLocalIP?.().then((ip: string) => {
+      if (ip) {
+        console.log('App.tsx: getLocalIP', ip)
+        setSelfIPaddress(ip)
+      }
+    }).catch((e) => console.warn('getLocalIP failed', e))
+  })
+  const isTestMode = () => import.meta.env.VITE_TEST_MODE === 'true'
+
+
   return (
     <>
       <div class="button-row">
-        <TestDroneButton />
-        <Show when={TestingMode() == true}>
+        <p>{selfIPaddress()}</p>
+        <Show when={isTestMode() === true}>
+          <TestDroneButton />
+        </Show>
+        <Show when={TestingMode() === true}>
           <LaunchMissileButton />
         </Show>
         <FlareButton />

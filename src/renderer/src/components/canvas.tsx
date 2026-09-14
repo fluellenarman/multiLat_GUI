@@ -88,18 +88,14 @@ const Canvas: Component = () => {
             testDrone.findNextPoint();
             renderDrone(ctx)
 
-            // const radius = testDrone.z / 10 + 3;
-            // renderCircle(ctx, testDrone.x, testDrone.y, radius, alpha);
-            // testDrone.renderOptimalFlareCircle(ctx);
-            // renderText(ctx, testDrone.z.toString(), testDrone.x, testDrone.y, radius + 5);
-            // console.log("TestDroneAngle: " + testDrone.forwardAngle.toString() + ", " + testDrone.rearAngle.toString());
         }
         if (missile.alive == true) {
             missile.findNextPoint();
 
+            const opacity = missile.calculateFadeout();
             const radius = missile.z / 10 + 3;
-            renderRedCircle(ctx, missile.x, missile.y, radius);
-            renderText(ctx, missile.z.toString(), missile.x, missile.y, radius + 5);
+            renderRedCircle(ctx, missile.renderedX, missile.renderedY, radius, opacity);
+            renderText(ctx, missile.renderedZ.toString(), missile.renderedX, missile.renderedY, radius + 5, opacity);
         }
         if (flareArr.length > 0) {
             for (let i = flareArr.length - 1; i >= 0; i--) {
@@ -157,7 +153,7 @@ const Canvas: Component = () => {
     
     function testIntervalFoo(ctx, canvas) {
         // console.log("testIntervalFoo called");
-        console.log(canvas.width, canvas.height);
+        // console.log(canvas.width, canvas.height);
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         drawGrid(ctx, canvas);
         let obj: renderBuffObj = {
@@ -166,7 +162,7 @@ const Canvas: Component = () => {
             id: "test1"
         }
         // renderBuffer.push(obj);
-        secTriggerCheck();
+        secTriggerCheck(ctx);
         requestAnimationFrame(() => renderObjs(ctx));
 
         global_x += 1;
@@ -175,7 +171,7 @@ const Canvas: Component = () => {
 
     
     let frameCount = 0
-    function secTriggerCheck() {
+    function secTriggerCheck(ctx) {
         frameCount += 1;
         if (frameCount >= 30) {
             // console.log("TestDrone forward angle: ", testDrone.forwardAngle)
