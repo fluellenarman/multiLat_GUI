@@ -3,7 +3,7 @@ import { electronAPI } from '@electron-toolkit/preload'
 
 // Custom APIs for renderer
 const api = {
-    onSerialData: (callback) => ipcRenderer.on('serial-data', (_event, data) => callback(data))
+  onSerialData: (callback) => ipcRenderer.on('serial-data', (_event, data) => callback(data))
 }
 
 // Use `contextBridge` APIs to expose Electron APIs to
@@ -20,6 +20,7 @@ if (process.contextIsolated) {
       sendIP: (data) => ipcRenderer.send('IP-address', data),
       sendDroneLoc: (data) => ipcRenderer.send('droneLoc', data),
       sendMissileLoc: (data) => ipcRenderer.send('missileLoc', data),
+      sendMissileHit: () => ipcRenderer.send('missileHit'),
       sendFlarePing: (data) => ipcRenderer.send('flarePing', data),
     })
     contextBridge.exposeInMainWorld('electronAPI', {
@@ -31,7 +32,6 @@ if (process.contextIsolated) {
       
       getLocalIP: () => ipcRenderer.invoke('get-local-ip'),
     })
-    
   } catch (error) {
     console.error(error)
   }
