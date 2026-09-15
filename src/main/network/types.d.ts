@@ -1,5 +1,5 @@
 export interface DiscoveryMessage {
-  type: 'DISCOVER' | 'DISCOVER_RESPONSE'
-  id: string
-  port: number
+	type: 'DISCOVER' | 'DISCOVER_RESPONSE'
+	id: string
+	port: number
 }
