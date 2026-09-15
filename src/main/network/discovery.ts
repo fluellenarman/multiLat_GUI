@@ -58,7 +58,8 @@ export class DiscoveryNetwork {
 
 		this.socket.bind(this.port, () => {
 			// this.socket.setBroadcast(true);
-			this.socket.addMembership(this.multicast)
+			for (const iface of getLocalAddresses())
+				this.socket.addMembership(this.multicast, iface.address)
 			this.broadcast()
 		})
 	}
@@ -102,7 +103,6 @@ export class DiscoveryNetwork {
 					this.handleResponse(message, rinfo)
 					break
 				case 'DISCOVER':
-					this.handleResponse(message, rinfo)
 					this.handleRequest(rinfo)
 					break
 				default:
