@@ -23,15 +23,16 @@ function getBroadcastAddress(address: string, netmask: string) {
   return ip.map((octet, i) => octet | (~mask[i] & 255)).join('.')
 }
 
-export class Discovery {
+export class DiscoveryNetwork {
   // Add new device ids here
   private devices = new Set<string>(['red-gui'])
-  private socket = dgram.createSocket('udp4')
+  private socket = dgram.createSocket({ type: 'udp4', reuseAddr: true })
 
   peers = new Map<string, string>()
 
   constructor(
     private readonly id = 'blue-gui',
+    private readonly multicast = '224.0.0.1',
     private readonly port = 41234,
     private readonly httpPort = 3003
   ) {}
@@ -57,6 +58,7 @@ export class Discovery {
 
     this.socket.bind(this.port, () => {
       this.socket.setBroadcast(true)
+      this.socket.addMembership(this.multicast)
       this.broadcast()
     })
   }
@@ -80,6 +82,7 @@ export class Discovery {
         const broadcast = getBroadcastAddress(iface.address, iface.netmask)
         this.socket.send(data, this.port, broadcast)
       }
+      // this.socket.send(data, this.port, this.multicast);
     }, 5000)
   }
 
@@ -109,9 +112,8 @@ export class Discovery {
 
   private handleResponse(message: DiscoveryMessage, rinfo: dgram.RemoteInfo) {
     // return if not in device list or already found
-    if (!this.devices.has(message.id) || this.peers.has(message.id)) return
-
     const ip = `${rinfo.address}:${message.port}`
+    if (!this.devices.has(message.id) || this.peers.get(message.id) !== ip) return
     this.peers.set(message.id, ip)
   }
 
@@ -122,7 +124,13 @@ export class Discovery {
       port: this.httpPort
     }
 
+    // for testing on localhost
     const data = Buffer.from(JSON.stringify(message))
+    if (getLocalAddresses().some((iface) => iface.address === rinfo.address)) {
+      this.socket.send(data, this.port, this.multicast)
+      return
+    }
+
     this.socket.send(data, rinfo.port, rinfo.address)
   }
 }
