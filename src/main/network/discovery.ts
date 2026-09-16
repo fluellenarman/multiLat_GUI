@@ -35,7 +35,9 @@ export class DiscoveryNetwork {
 		private readonly multicast = '224.0.0.1',
 		private readonly port = 41234,
 		private readonly httpPort = 3003
-	) {}
+	) {
+		this.start()
+	}
 
 	start() {
 		this.socket.on('message', (data, rinfo) => {
@@ -113,7 +115,7 @@ export class DiscoveryNetwork {
 	private handleResponse(message: DiscoveryMessage, rinfo: dgram.RemoteInfo) {
 		// return if not in device list or already found
 		const ip = `${rinfo.address}:${message.port}`
-		if (!this.devices.has(message.id) || this.peers.get(message.id) !== ip) return
+		if (!this.devices.has(message.id) || this.peers.get(message.id) === ip) return
 		this.peers.set(message.id, ip)
 	}
 
