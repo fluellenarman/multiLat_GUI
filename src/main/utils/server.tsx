@@ -1,42 +1,20 @@
-import os from 'os'
 import express from 'express'
 import { BrowserWindow, ipcMain } from 'electron'
-import { DiscoveryNetwork } from '../network/discovery'
+import { DiscoveryNetwork, getDeviceAddresses } from '../network/discovery'
 
-let networkURL = ''
-let discoveryNetwork
-
-function getLocalIPAddress() {
-	const interfaces = os.networkInterfaces()
-	const addresses = []
-
-	for (const name of Object.keys(interfaces)) {
-		for (const iface of interfaces[name]) {
-			// Skip internal (loopback) and non-IPv4 addresses
-			if (iface.family === 'IPv4' && !iface.internal) {
-				addresses.push({ name, address: iface.address })
-			}
-		}
-	}
-
-	const selfIP_address = addresses[0]?.address
-	console.log(addresses)
-	console.log('from server, addresses:\n', addresses[0]?.address, '\n')
-	console.log(`http://${addresses[0]?.address}:3003/`)
-	return selfIP_address
-}
+let discoveryNetwork: DiscoveryNetwork
 
 function testFoo() {
 	console.log('server.tsx: testFoo called')
 }
 
 ipcMain.handle('get-local-ip', () => {
-	return getLocalIPAddress()
+	return getDeviceAddresses()[0].address
 })
 ipcMain.on('IP-address', (event, ipAddress) => {
 	console.log('Received IP address from renderer:', ipAddress)
 	const redPort = 3000
-	const url = `http://${ipAddress}:${redPort}/`
+	const url = `http://${ipAddress}:${redPort}`
 	console.log('Constructed URL:', url)
 	testQuery2(url) // Later, will need to change the query to be a POST request with correct data.
 })
@@ -68,7 +46,7 @@ ipcMain.on('flarePing', (event, data) => {
 
 function startServer(mainWindow: BrowserWindow, discovery: DiscoveryNetwork) {
 	discoveryNetwork = discovery
-	const selfIP_address = getLocalIPAddress()
+	const selfIP_address = getDeviceAddresses()[0].address
 	const server = express()
 	const port = 3003
 	server.use(express.json())
@@ -91,13 +69,14 @@ function startServer(mainWindow: BrowserWindow, discovery: DiscoveryNetwork) {
 		console.log('ServerQueries.ts: Received GET request at /')
 	})
 	server.post('/pingLOS', (req, res) => {
-		// res.send('Received POST request at /pingLOS')
+		res.send('Received POST request at /pingLOS')
 		sendLOS_pingRedGUI()
 		// console.log("ServerQueries.ts: Received POST request at /")
 		// console.log("ServerQueries.ts: Request body:", req.body)
 		mainWindow.webContents.send('ping', req.body)
 	})
 	server.get('/pingMissileLaunch', (req, res) => {
+		res.send('Received GET request at /pingMissileLaunch')
 		console.log('ServerQueries.ts: Received POST request at /pingMissileLaunch')
 		mainWindow.webContents.send('reqToLaunch', {})
 	})
@@ -109,6 +88,7 @@ function startServer(mainWindow: BrowserWindow, discovery: DiscoveryNetwork) {
 		mainWindow.webContents.send('reqToLauncherLoc', data)
 	})
 	server.post('/pingLOSLoc', (req, res) => {
+		res.send('Received POST request at /pingLOSLoc')
 		console.log('ServerQueries.ts: Received POST request at /pingLOSLoc')
 		// console.log(req.body)
 		const data = req.body
@@ -131,102 +111,86 @@ async function testQuery2(url) {
 	const response = await fetch(url)
 	const data = await response.text()
 	console.log(data)
+	console.log(url)
 	console.log('ServerQueries.ts: testQuery2() END\n')
-	networkURL = url
+	discoveryNetwork.setAddress('red-gui', url)
 }
 async function sendDroneLocRedGUI(loc) {
-	const redPort = 3000
-	const localhost_url = `http://localhost:${redPort}/droneLoc`
-	const payload = { x: loc[0], y: loc[1] }
-	// console.log(payload)
 	try {
-		let targetURL = localhost_url
-		// console.log(networkURL)
-		if (networkURL != '') {
-			targetURL = `${networkURL}/droneLoc`
-			console.log('Using network URL: ', networkURL)
+		const address = await discoveryNetwork.getAddress('red-gui')
+		if (!address) {
+			console.log('sendDroneLocRedGUI(): failed to connect to red gui')
+			return
 		}
-		// console.log(`Sending drone location to ${targetURL}`);
-		await fetch(targetURL, {
+
+		const url = `http://${address}/droneLoc`
+		const payload = { x: loc[0], y: loc[1] }
+		await fetch(url, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify(payload)
 		})
+		console.log(url)
 	} catch (error) {
-		// console.error("Error in launcherLocQuery():", error);
+		console.error('sendDroneLocRedGUI():', error)
 	}
 }
+
 async function sendMissileLocRedGUI(loc) {
-	const redPort = 3000
-	const localhost_url = `http://localhost:${redPort}/missileLoc`
-	console.log(loc)
-	const payload = { x: loc[0], y: loc[1] }
-	console.log('sendMissileLocRedGUI')
-	// console.log(payload)
 	try {
-		let targetURL = localhost_url
-		// console.log(networkURL)
-		if (networkURL != '') {
-			targetURL = `${networkURL}missileLoc`
-			console.log('Using network URL: ', networkURL)
+		const address = await discoveryNetwork.getAddress('red-gui')
+		if (!address) {
+			console.log('sendMissileLocRedGUI(): failed to connect to red gui')
+			return
 		}
-		console.log(`Sending drone location to ${targetURL}`)
-		await fetch(targetURL, {
+
+		const url = `http://${address}/missileLoc`
+		const payload = { x: loc[0], y: loc[1] }
+		await fetch(url, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify(payload)
 		})
+		console.log(url)
 	} catch (error) {
-		// console.error("Error in launcherLocQuery():", error);
+		console.error('Error in sendMissileLocRedGUI():', error)
 	}
 }
 async function sendLOS_pingRedGUI() {
-	const redPort = 3000
-	const localhost_url = `http://localhost:${redPort}/LOS-ping`
-	// console.log('sendLOS_pingRedGUI')
 	try {
-		let targetURL = localhost_url
-		// console.log(networkURL)
-		if (networkURL != '') {
-			targetURL = `${networkURL}LOS-ping`
-			console.log('Using network URL: ', networkURL)
+		const address = await discoveryNetwork.getAddress('red-gui')
+		if (!address) {
+			console.log('sendLOS_pingRedGUI(): failed to connect to red gui')
+			return
 		}
-		// console.log(`Sending LOS ping to ${targetURL}`);
-		await fetch(targetURL, {
+
+		const url = `http://${address}/LOS-ping`
+		await fetch(url, {
 			method: 'GET',
 			headers: { 'Content-Type': 'application/json' }
 		})
+		console.log(url)
 	} catch (error) {
-		// console.error("Error in launcherLocQuery():", error);
+		console.error('Error in sendLOS_pingRedGUI():', error)
 	}
 }
 async function sendFlarePingRedGUI() {
-	const redPort = 3000
-	const localhost_url = `http://localhost:${redPort}/FlarePing`
-	console.log('server.tsx: sendLOS_pingRedGUI')
 	try {
-		let targetURL = localhost_url
-		// console.log(networkURL)
-		if (networkURL != '') {
-			targetURL = `${networkURL}FlarePing`
-			console.log('Using network URL: ', networkURL)
+		const address = await discoveryNetwork.getAddress('red-gui')
+		if (!address) {
+			console.log('sendFlarePingRedGUI(): failed to connect to red gui')
+			return
 		}
-		// console.log(`Sending LOS ping to ${targetURL}`);
-		await fetch(targetURL, {
+
+		const url = `http://${address}/FlarePing`
+		await fetch(url, {
 			method: 'GET',
 			headers: { 'Content-Type': 'application/json' }
 		})
+		console.log(url)
 	} catch (error) {
-		// console.error("Error in launcherLocQuery():", error);
+		console.error('Error in sendFlarePingRedGUI():', error)
 	}
 }
 
 export { testFoo, startServer }
-
-/*
-ping received/handled will be in this JSON format.
-
-ping {
-    ping: true,
-}
-*/

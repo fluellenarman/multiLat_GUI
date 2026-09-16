@@ -16,7 +16,16 @@ export class DiscoveryNetwork {
 		this.start()
 	}
 
-	getAddress(id: string) {
+	async getAddress(id: string, max_retries = 5) {
+		const delay = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms))
+
+		for (let retries = 0; retries < max_retries; retries++) {
+			if (this.peers.get(id)) break
+
+			this.broadcastOnce()
+			await delay(250)
+		}
+
 		return this.peers.get(id)
 	}
 
@@ -58,16 +67,36 @@ export class DiscoveryNetwork {
 		}
 
 		const data = Buffer.from(JSON.stringify(message))
-		const broadcastInterval = setInterval(() => {
-			if (this.devices.size == this.peers.size) {
+		let broadcastInterval: NodeJS.Timeout
+		const broadcastDevice = () => {
+			if (this.devices.size === this.peers.size) {
 				clearInterval(broadcastInterval)
-				console.log('All peers discovered: ', this.devices.keys())
+				console.log('All peers discovered:', this.devices.keys())
 				return
 			}
 
 			for (const address of getBroadcastAddresses())
 				this.socket.send(data, this.port, address)
-		}, 5000)
+		}
+
+		broadcastDevice()
+		broadcastInterval = setInterval(broadcastDevice, 5000)
+	}
+
+	broadcastOnce() {
+		if (this.devices.size === this.peers.size) {
+			console.log('All peers discovered:', this.devices.keys())
+			return
+		}
+
+		const message: DiscoveryMessage = {
+			type: 'DISCOVER',
+			id: this.id,
+			port: this.httpPort
+		}
+
+		const data = Buffer.from(JSON.stringify(message))
+		for (const address of getBroadcastAddresses()) this.socket.send(data, this.port, address)
 	}
 
 	private handleMessage(data: Buffer, rinfo: dgram.RemoteInfo) {
