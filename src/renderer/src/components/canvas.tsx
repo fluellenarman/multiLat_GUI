@@ -208,9 +208,9 @@ const Canvas: Component = () => {
             droneTracker.handleLOS_timer();
             if (droneTracker.LOS_achieved == true) {
                 console.log("canvas.tsx: LOS achieved - loc", testDrone.x, testDrone.y);
-                // Send location to main process
-                window.rendToMainAPI.sendDroneLoc([testDrone.x, testDrone.y]);
             }
+            // Send location to main process
+            window.rendToMainAPI.sendDroneLoc([testDrone.x, testDrone.y]);
             frameCount = 0;
         }
     }

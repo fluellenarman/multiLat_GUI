@@ -9,6 +9,7 @@ import { FlareButton, flareArr } from './components/flaresButton'
 import { IP_addressInput } from './components/IPaddressInput'
 import electronLogo from './assets/electron.svg'
 import './assets/canvas.css'
+import { Toaster } from 'solid-toast';
 
 const App: Component = () => {
   const ipcHandle = (): void => window.electron.ipcRenderer.send('ping')
@@ -30,6 +31,7 @@ const App: Component = () => {
   return (
     <>
       <div class="button-row">
+        <Toaster position="top-right" /> 
         <p>{selfIPaddress()}</p>
         <Show when={isTestMode() === true}>
           <TestDroneButton />
