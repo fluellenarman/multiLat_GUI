@@ -1,6 +1,5 @@
 import express from 'express'
 import { BrowserWindow, ipcMain } from 'electron'
-import {colorPrint} from './logging'
 import { DiscoveryNetwork, getDeviceAddresses } from '../network/discovery'
 
 let discoveryNetwork: DiscoveryNetwork
@@ -12,21 +11,26 @@ function testFoo() {
 ipcMain.handle('get-local-ip', () => {
 	return getDeviceAddresses()[0].address
 })
-ipcMain.on('IP-address', (event, ipAddress) => {
-	console.log('Received IP address from renderer:', ipAddress)
-	const redPort = 3000
-	const url = `http://${ipAddress}:${redPort}`
-	console.log('Constructed URL:', url)
-	testQuery2(url) // Later, will need to change the query to be a POST request with correct data.
+
+ipcMain.on('IP-address', (event, data) => {
+	console.log('Received IP address from renderer:', data)
+	sendManualAddress(event, data) // Later, will need to change the query to be a POST request with correct data.
 })
+
+ipcMain.handle('get-devices', () => {
+	return discoveryNetwork.getDevices()
+})
+
 ipcMain.on('droneLoc', (event, loc) => {
 	// console.log("Received droneLoc from renderer:", loc);
-	sendDroneLocRedGUI(loc)
+	sendDroneLocRedGUI(event, loc)
 })
+
 ipcMain.on('missileLoc', (event, loc) => {
 	// console.log("Received missileLoc from renderer:", loc);
-	sendMissileLocRedGUI(loc)
+	sendMissileLocRedGUI(event, loc)
 })
+
 ipcMain.on('flarePing', (event, data) => {
 	console.log('Server.tsx: Received flarePing from renderer:')
 
@@ -35,7 +39,7 @@ ipcMain.on('flarePing', (event, data) => {
 
 	const id = setInterval(() => {
 		intervalCount++
-		sendFlarePingRedGUI()
+		sendFlarePingRedGUI(event)
 
 		if (intervalCount >= intervalMax) {
 			intervalCount = 0
@@ -71,7 +75,7 @@ function startServer(mainWindow: BrowserWindow, discovery: DiscoveryNetwork) {
 	})
 	server.post('/pingLOS', (req, res) => {
 		res.send('Received POST request at /pingLOS')
-		sendLOS_pingRedGUI()
+		sendLOS_pingRedGUI(mainWindow)
 		// console.log("ServerQueries.ts: Received POST request at /")
 		// console.log("ServerQueries.ts: Request body:", req.body)
 		mainWindow.webContents.send('ping', req.body)
@@ -109,23 +113,32 @@ async function testQuery() {
 	console.log('ServerQueries.ts: testQuery() END\n')
 }
 
-async function testQuery2(url) {
-	const response = await fetch(url)
-	const data = await response.text()
-	console.log(data)
-	console.log(url)
-	console.log('ServerQueries.ts: testQuery2() END\n')
-	discoveryNetwork.setAddress('red-gui', url)
-}
-async function sendDroneLocRedGUI(loc) {
+async function sendManualAddress(event, data) {
+	const { id, ip } = data
+	const port = 3000
 	try {
-		const address = await discoveryNetwork.getAddress('red-gui')
+		const address = `${ip}:${port}`
+		const url = `http://${address}`
+		await fetch(url)
+		event.sender.send('disable-ip-button', {})
+		discoveryNetwork.setAddress(id, address)
+	} catch {
+		event.sender.send('enable-ip-button', {})
+	}
+}
+
+async function sendDroneLocRedGUI(event, loc) {
+	const id = 'red-gui'
+	const api = '/droneLoc'
+	try {
+		const address = await discoveryNetwork.getAddress(id)
 		if (!address) {
-			console.log('sendDroneLocRedGUI(): failed to connect to red gui')
+			console.log(`sendDroneLocRedGUI(): failed to connect to ${id}`)
+			event.sender.send('enable-ip-button', { id: id, api: api })
 			return
 		}
 
-		const url = `http://${address}/droneLoc`
+		const url = `http://${address}${api}`
 		const payload = { x: loc[0], y: loc[1] }
 		await fetch(url, {
 			method: 'POST',
@@ -135,18 +148,22 @@ async function sendDroneLocRedGUI(loc) {
 		console.log(url)
 	} catch (error) {
 		console.error('sendDroneLocRedGUI():', error)
+		discoveryNetwork.deleteAddress(id)
 	}
 }
 
-async function sendMissileLocRedGUI(loc) {
+async function sendMissileLocRedGUI(event, loc) {
+	const id = 'red-gui'
+	const api = '/missileLOC'
 	try {
-		const address = await discoveryNetwork.getAddress('red-gui')
+		const address = await discoveryNetwork.getAddress(id)
 		if (!address) {
-			console.log('sendMissileLocRedGUI(): failed to connect to red gui')
+			console.log(`sendMissileLocRedGUI(): failed to connect to ${id}`)
+			event.sender.send('enable-ip-button', { id: id, api: api })
 			return
 		}
 
-		const url = `http://${address}/missileLoc`
+		const url = `http://${address}${api}`
 		const payload = { x: loc[0], y: loc[1] }
 		await fetch(url, {
 			method: 'POST',
@@ -156,17 +173,21 @@ async function sendMissileLocRedGUI(loc) {
 		console.log(url)
 	} catch (error) {
 		console.error('Error in sendMissileLocRedGUI():', error)
+		discoveryNetwork.deleteAddress(id)
 	}
 }
-async function sendLOS_pingRedGUI() {
+async function sendLOS_pingRedGUI(mainWindow: BrowserWindow) {
+	const id = 'red-gui'
+	const api = '/LOS-ping'
 	try {
-		const address = await discoveryNetwork.getAddress('red-gui')
+		const address = await discoveryNetwork.getAddress(id)
 		if (!address) {
-			console.log('sendLOS_pingRedGUI(): failed to connect to red gui')
+			console.log(`sendLOS_pingRedGUI(): failed to connect to ${id}`)
+			mainWindow.webContents.send('enable-ip-button', { id: id, api: api })
 			return
 		}
 
-		const url = `http://${address}/LOS-ping`
+		const url = `http://${address}${api}`
 		await fetch(url, {
 			method: 'GET',
 			headers: { 'Content-Type': 'application/json' }
@@ -174,17 +195,21 @@ async function sendLOS_pingRedGUI() {
 		console.log(url)
 	} catch (error) {
 		console.error('Error in sendLOS_pingRedGUI():', error)
+		discoveryNetwork.deleteAddress(id)
 	}
 }
-async function sendFlarePingRedGUI() {
+async function sendFlarePingRedGUI(event) {
+	const id = 'red-gui'
+	const api = '/FlarePing'
 	try {
-		const address = await discoveryNetwork.getAddress('red-gui')
+		const address = await discoveryNetwork.getAddress(id)
 		if (!address) {
-			console.log('sendFlarePingRedGUI(): failed to connect to red gui')
+			console.log(`sendFlarePingRedGUI(): failed to connect to ${id}`)
+			event.sender.send('enable-ip-button', { id: id, api: api })
 			return
 		}
 
-		const url = `http://${address}/FlarePing`
+		const url = `http://${address}${api}`
 		await fetch(url, {
 			method: 'GET',
 			headers: { 'Content-Type': 'application/json' }
@@ -192,6 +217,7 @@ async function sendFlarePingRedGUI() {
 		console.log(url)
 	} catch (error) {
 		console.error('Error in sendFlarePingRedGUI():', error)
+		discoveryNetwork.deleteAddress(id)
 	}
 }
 
