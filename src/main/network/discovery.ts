@@ -26,7 +26,7 @@ export class DiscoveryNetwork {
 		for (let retries = 0; retries < max_retries; retries++) {
 			if (this.peers.get(id)) break
 
-			// this.broadcastOnce()
+			this.broadcastOnce()
 			await delay(250)
 		}
 
@@ -63,7 +63,7 @@ export class DiscoveryNetwork {
 		this.socket.bind(this.port, () => {
 			this.socket.setBroadcast(true)
 			this.socket.addMembership(this.multicast)
-			// this.broadcast()
+			this.broadcast()
 		})
 	}
 
