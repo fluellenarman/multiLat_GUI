@@ -16,13 +16,17 @@ export class DiscoveryNetwork {
 		this.start()
 	}
 
+	getDevices() {
+		return this.devices
+	}
+
 	async getAddress(id: string, max_retries = 5) {
 		const delay = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms))
 
 		for (let retries = 0; retries < max_retries; retries++) {
 			if (this.peers.get(id)) break
 
-			this.broadcastOnce()
+			// this.broadcastOnce()
 			await delay(250)
 		}
 
@@ -31,6 +35,10 @@ export class DiscoveryNetwork {
 
 	setAddress(id: string, ip: string) {
 		this.peers.set(id, ip)
+	}
+
+	deleteAddress(id: string) {
+		this.peers.delete(id)
 	}
 
 	start() {
@@ -55,7 +63,7 @@ export class DiscoveryNetwork {
 		this.socket.bind(this.port, () => {
 			this.socket.setBroadcast(true)
 			this.socket.addMembership(this.multicast)
-			this.broadcast()
+			// this.broadcast()
 		})
 	}
 
