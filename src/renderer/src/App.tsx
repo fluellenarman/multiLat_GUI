@@ -36,9 +36,7 @@ const App: Component = () => {
 			<div class="button-row">
 				<Toaster position="top-right" />
 				<p>{selfIPaddress()}</p>
-				<Show when={isTestMode() === true}>
-					<TestDroneButton />
-				</Show>
+				<TestDroneButton />
 				<Show when={TestingMode() === true}>
 					<LaunchMissileButton />
 				</Show>

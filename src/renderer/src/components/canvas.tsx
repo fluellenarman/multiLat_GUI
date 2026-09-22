@@ -2,6 +2,7 @@ import { Component, onMount } from 'solid-js'
 import {
 	utilFoo,
 	renderCircle,
+	renderX,
 	renderText,
 	renderRedCircle,
 	renderRect,
@@ -70,7 +71,6 @@ const Canvas: Component = () => {
 		testDrone.renderOptimalFlareCircle(ctx, drone_X, drone_Y, alpha)
 		renderText(ctx, drone_Z.toString(), drone_X, drone_Y, radius + 5, alpha)
 		ctx.restore()
-
 		alpha -= 1 / 60
 		if (alpha < 0) {
 			alpha = 1
@@ -91,7 +91,10 @@ const Canvas: Component = () => {
 		if (testDrone.alive == true) {
 			testDrone.findNextPoint()
 			renderDrone(ctx)
+		} else {
+			renderX(ctx, drone_X, drone_Y, radius)
 		}
+
 		if (missile.alive == true) {
 			missile.findNextPoint()
 

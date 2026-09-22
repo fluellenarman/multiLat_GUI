@@ -21,7 +21,8 @@ if (process.contextIsolated) {
 			sendDroneLoc: (data) => ipcRenderer.send('droneLoc', data),
 			sendMissileLoc: (data) => ipcRenderer.send('missileLoc', data),
 			sendFlarePing: (data) => ipcRenderer.send('flarePing', data),
-			sendJamPing: () => ipcRenderer.send('jam-ping')
+			sendJamPing: () => ipcRenderer.send('jam-ping'),
+			sendDroneStatusPing: (data) => ipcRenderer.send('droneStatus', data)
 		})
 		contextBridge.exposeInMainWorld('electronAPI', {
 			// main to renderer
