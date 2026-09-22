@@ -49,6 +49,10 @@ ipcMain.on('flarePing', (event, data) => {
 	// sendFlarePingRedGUI();
 })
 
+ipcMain.on('droneStatus', (event, data) => {
+	sendDroneStatusPing(event, data)
+})
+
 function startServer(mainWindow: BrowserWindow, discovery: DiscoveryNetwork) {
 	discoveryNetwork = discovery
 	const selfIP_address = getDeviceAddresses()[0].address
@@ -217,6 +221,31 @@ async function sendFlarePingRedGUI(event) {
 		console.log(url)
 	} catch (error) {
 		console.error('Error in sendFlarePingRedGUI():', error)
+		discoveryNetwork.deleteAddress(id)
+	}
+}
+
+async function sendDroneStatusPing(event, data) {
+	const id = 'red-gui'
+	const api = '/droneStatus'
+	try {
+		const address = await discoveryNetwork.getAddress(id)
+		if (!address) {
+			console.log(`sendDroneStatusPing(): failed to connect to ${id}`)
+			event.sender.send('enable-ip-button', { id: id, api: api })
+			return
+		}
+
+		const url = `http://${address}${api}`
+		const payload = { droneStatus: data }
+		await fetch(url, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify(payload)
+		})
+		console.log(url)
+	} catch (error) {
+		console.error('Error in sendDroneStatusPing():', error)
 		discoveryNetwork.deleteAddress(id)
 	}
 }

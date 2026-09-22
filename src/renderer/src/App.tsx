@@ -9,43 +9,42 @@ import { FlareButton, flareArr } from './components/flaresButton'
 import { IP_addressInput } from './components/IPaddressInput'
 import electronLogo from './assets/electron.svg'
 import './assets/canvas.css'
-import { Toaster } from 'solid-toast';
+import { Toaster } from 'solid-toast'
 
 const App: Component = () => {
-  const ipcHandle = (): void => window.electron.ipcRenderer.send('ping')
+	const ipcHandle = (): void => window.electron.ipcRenderer.send('ping')
 
-  const [selfIPaddress, setSelfIPaddress] = createSignal('')
+	const [selfIPaddress, setSelfIPaddress] = createSignal('')
 
-  onMount(() => {
-    // also explicitly request the IP from main to avoid race
-    window.electronAPI.getLocalIP?.().then((ip: string) => {
-      if (ip) {
-        console.log('App.tsx: getLocalIP', ip)
-        setSelfIPaddress(ip)
-      }
-    }).catch((e) => console.warn('getLocalIP failed', e))
-  })
-  const isTestMode = () => import.meta.env.VITE_TEST_MODE === 'true'
+	onMount(() => {
+		// also explicitly request the IP from main to avoid race
+		window.electronAPI
+			.getLocalIP?.()
+			.then((ip: string) => {
+				if (ip) {
+					console.log('App.tsx: getLocalIP', ip)
+					setSelfIPaddress(ip)
+				}
+			})
+			.catch((e) => console.warn('getLocalIP failed', e))
+	})
 
-
-  return (
-    <>
-      <div class="button-row">
-        <Toaster position="top-right" /> 
-        <p>{selfIPaddress()}</p>
-        <Show when={isTestMode() === true}>
-          <TestDroneButton />
-        </Show>
-        <Show when={TestingMode() === true}>
-          <LaunchMissileButton />
-        </Show>
-        <FlareButton />
-        <IP_addressInput />
-      </div>
-      <Canvas />
-      {/* <Versions /> */}
-    </>
-  )
+	return (
+		<>
+			<div class="button-row">
+				<Toaster position="top-right" />
+				<p>{selfIPaddress()}</p>
+				<TestDroneButton />
+				<Show when={TestingMode() === true}>
+					<LaunchMissileButton />
+				</Show>
+				<FlareButton />
+				<IP_addressInput />
+			</div>
+			<Canvas />
+			{/* <Versions /> */}
+		</>
+	)
 }
 
 export default App
