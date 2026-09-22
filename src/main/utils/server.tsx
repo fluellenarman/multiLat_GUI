@@ -49,6 +49,10 @@ ipcMain.on('flarePing', (event, data) => {
 	// sendFlarePingRedGUI();
 })
 
+ipcMain.on('jam-ping', (event) => {
+	sendJamPing(event)
+})
+
 function startServer(mainWindow: BrowserWindow, discovery: DiscoveryNetwork) {
 	discoveryNetwork = discovery
 	const selfIP_address = getDeviceAddresses()[0].address
@@ -217,6 +221,29 @@ async function sendFlarePingRedGUI(event) {
 		console.log(url)
 	} catch (error) {
 		console.error('Error in sendFlarePingRedGUI():', error)
+		discoveryNetwork.deleteAddress(id)
+	}
+}
+
+async function sendJamPing(event) {
+	const id = 'red-gui'
+	const api = '/jamPing'
+	try {
+		const address = await discoveryNetwork.getAddress(id)
+		if (!address) {
+			console.log(`sendJamPing(): failed to connect to ${id}`)
+			event.sender.send('enable-ip-button', { id: id, api: api })
+			return
+		}
+
+		const url = `http://${address}${api}`
+		await fetch(url, {
+			method: 'GET',
+			headers: { 'Content-Type': 'application/json' }
+		})
+		console.log(url)
+	} catch (error) {
+		console.error('Error in sendJamPing():', error)
 		discoveryNetwork.deleteAddress(id)
 	}
 }

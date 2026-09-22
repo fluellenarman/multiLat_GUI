@@ -20,7 +20,8 @@ if (process.contextIsolated) {
 			sendIP: (data) => ipcRenderer.send('IP-address', data),
 			sendDroneLoc: (data) => ipcRenderer.send('droneLoc', data),
 			sendMissileLoc: (data) => ipcRenderer.send('missileLoc', data),
-			sendFlarePing: (data) => ipcRenderer.send('flarePing', data)
+			sendFlarePing: (data) => ipcRenderer.send('flarePing', data),
+			sendJamPing: () => ipcRenderer.send('jam-ping')
 		})
 		contextBridge.exposeInMainWorld('electronAPI', {
 			// main to renderer
