@@ -175,4 +175,31 @@ export function getBroadcastAddresses() {
 	})
 }
 
-export default { DiscoveryNetwork, getDeviceAddresses, getBroadcastAddresses }
+export function getWifiAddress(): string | null {
+	const interfaces = os.networkInterfaces()
+	const platform = process.platform
+
+	for (const interfaceName of Object.keys(interfaces)) {
+		let isWifi = false
+
+		if (platform === 'win32') {
+			isWifi = /wi-fi|wireless|wlan/i.test(interfaceName)
+		} else if (platform === 'linux') {
+			isWifi = /^wl/.test(interfaceName)
+		}
+
+		if (isWifi) {
+			const addresses = interfaces[interfaceName]
+			if (addresses) {
+				const ipv4 = addresses.find((info) => info.family === 'IPv4' && !info.internal)
+				if (ipv4) {
+					return ipv4.address
+				}
+			}
+		}
+	}
+
+	return null
+}
+
+export default { DiscoveryNetwork, getDeviceAddresses, getBroadcastAddresses, getWifiAddress }

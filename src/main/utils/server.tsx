@@ -1,6 +1,6 @@
 import express from 'express'
 import { BrowserWindow, ipcMain } from 'electron'
-import { DiscoveryNetwork, getDeviceAddresses } from '../network/discovery'
+import { DiscoveryNetwork, getWifiAddress } from '../network/discovery'
 
 let discoveryNetwork: DiscoveryNetwork
 
@@ -9,7 +9,7 @@ function testFoo() {
 }
 
 ipcMain.handle('get-local-ip', () => {
-	return getDeviceAddresses()[0].address
+	return getWifiAddress()
 })
 
 ipcMain.on('IP-address', (event, data) => {
@@ -59,7 +59,7 @@ ipcMain.on('droneStatus', (event, data) => {
 
 function startServer(mainWindow: BrowserWindow, discovery: DiscoveryNetwork) {
 	discoveryNetwork = discovery
-	const selfIP_address = getDeviceAddresses()[0].address
+	const selfIP_address = getWifiAddress()
 	const server = express()
 	const port = 3003
 	server.use(express.json())
