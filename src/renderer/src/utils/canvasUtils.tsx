@@ -271,6 +271,7 @@ class flareState {
 
 	alive: boolean = true
 	zSpeed: number = 0
+	alpha: number = Math.random() * 0.8
 
 	lifespan: number = 5
 	speed: number = 1

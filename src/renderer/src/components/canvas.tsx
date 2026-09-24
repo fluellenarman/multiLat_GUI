@@ -119,11 +119,19 @@ const Canvas: Component = () => {
 				} else {
 					flare.findNextPoint()
 
+					flare.alpha -= 1 / 60
+					if (flare.alpha < 0) {
+						flare.alpha = 1
+					}
+
 					const radius = flare.z / 10 + 3
 					ctx.fillStyle = 'white'
 					ctx.strokeStyle = 'white'
-					renderCircle(ctx, flare.x, flare.y, radius)
-					renderText(ctx, flare.z.toString(), flare.x, flare.y, radius + 5)
+					ctx.save()
+					ctx.globalAlpha = flare.alpha
+					renderCircle(ctx, flare.x, flare.y, radius, flare.alpha)
+					renderText(ctx, flare.z.toString(), flare.x, flare.y, radius + 5, flare.alpha)
+					ctx.restore()
 				}
 			}
 		}
