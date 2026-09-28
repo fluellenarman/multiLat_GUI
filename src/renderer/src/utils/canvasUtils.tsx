@@ -218,7 +218,10 @@ class droneState {
     ifAtPoint() {
         const deviation = 5;
         const dest = this.currentPath[this.currentPathIndex];
+        console.log(this.currentPath, this.currentPathIndex)
         // const distance = distanceBetweenPoints(this.x, this.y, dest.x, dest.y);
+        console.log(this.x, this.y, this.z)
+        console.log(dest.x, dest.y, dest.z)
         const distance = d3_distanceBetweenPoints(this.x, this.y, this.z, dest.x, dest.y, dest.z);
         
         if (distance <= deviation) {
@@ -244,8 +247,21 @@ class droneState {
         ctx.arc(x, y, 100, 0, 2 * Math.PI);
         ctx.stroke();
     }
+    setCoordinate(x, y, z) {
+        this.x = x
+        this.y = y
+        this.z = z
+    }
 }
 
+// Used for rendering icons who'se determined by serial data
+class serialDroneState extends droneState {
+    setCoordinate(x, y, z) {
+        this.x = x
+        this.y = y
+        this.z = z
+    }
+}
 class flareState {
     x: number = 0;
     y: number = 0;
@@ -562,5 +578,6 @@ export { utilFoo,
     missile,
     drone1,
     drone2,
-    testDrone
+    testDrone,
+    serialDroneState
 };

@@ -5,12 +5,10 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { SerialPort } from 'serialport'
 import { ReadlineParser } from '@serialport/parser-readline'
 import { startServer } from './utils/server'
-import { spawnProcessAndListen, pyProcess } from './utils/spawnChild'
+import { spawnProcessAndListen, pyProcess, sendMessageToChild, setRangingData} from './utils/spawnChild'
 import { DiscoveryNetwork } from './network/discovery'
-
+import { colorPrint } from "./utils/logging"
 import icon from '../../resources/icon.png?asset'
-
-spawnProcessAndListen()
 
 function createWindow(): void {
 	// Create the browser window.
@@ -29,6 +27,10 @@ function createWindow(): void {
 
 	const discoveryNetwork = new DiscoveryNetwork()
 	startServer(mainWindow, discoveryNetwork)
+	
+	if (import.meta.env.MODE != 'test') {
+		spawnProcessAndListen(mainWindow)
+	} else { colorPrint("yellow", "index.ts: Skipping spawning serial/multilat process")}
 
 	// Create serial port
 	const port = new SerialPort({
@@ -39,10 +41,12 @@ function createWindow(): void {
 	// Open the port
 	port.open((err) => {
 		if (err) {
+			colorPrint("red")
 			console.error('Failed to open port:', err.message)
 			return
 		}
-		console.log('Port is open!')
+		// console.log('Serial Port is open!')
+		colorPrint("green", "Serial Port is open")
 	})
 	const parser = new ReadlineParser({
 		delimiter: '\n',
@@ -54,9 +58,11 @@ function createWindow(): void {
 
 	parser.on('data', (line) => {
 		const serialData = line.trim()
+		// colorPrint("blue", "received serial data")
 		// console.log('Received line:', serialData);
-		// console.log("SENDING");
-		mainWindow.webContents.send('serial-data', serialData)
+		setRangingData(serialData)
+
+		// mainWindow.webContents.send('serial-data', serialData)
 	})
 
 	// Express Server for testing (Receiving test Serial data)
@@ -112,6 +118,10 @@ app.whenReady().then(() => {
 	// Listen to for messages from renderer // specifically for python child
 	ipcMain.on('message-channel', (_event, data) => {
 		// console.log('Received message from renderer:', data);
+		if (!pyProcess) {
+			colorPrint("yellow", "index.ts: Skipping message-channel, pyProcess not running")
+			return
+		}
 		const message = JSON.stringify(data) + '\n'
 		pyProcess.stdin.write(message)
 	})

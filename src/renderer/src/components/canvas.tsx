@@ -9,6 +9,7 @@ import {
 } from "./flaresButton"
 import {contextBridge, ipcRenderer } from 'electron'
 import test from "node:test";
+import { TestingMode, setTestingMode, toggleTestingMode } from '../utils/testingMode';
 
 interface renderBuffObj {
     x: number;
@@ -54,29 +55,46 @@ const Canvas: Component = () => {
     let drone_Z = testDrone.z;
     let radius = testDrone.z / 10 + 3;
 
+    let ctx
+    let curDroneLoc = [0, 0, 0]
+    let pendingDroneLoc = [0, 0, 0]
+
+    window.electronAPI.onSerialDroneLoc((data) => {
+        if (TestingMode() == false) {
+            // console.log('canvas.tsx: cur drone loc', testDrone.x, testDrone.y)
+            // need to translate data into canvas dimensions
+            data.x = data.x * 44.11
+            data.y = data.y * 38.51
+            // console.log("canvs.tsx: serialDroneLoc", data)
+            // console.log("canvas.tsx: ctx.globalAlpha: ", ctx.globalAlpha)
+            console.log(data.id, data.x, data.y, data.z)
+            pendingDroneLoc = [data.x, data.y, data.z]
+            
+        }
+    })
+
     function renderDrone(ctx) {
         ctx.save()
-        console.log(alpha)
         ctx.globalAlpha = alpha
         ctx.fillStyle = "white";
         ctx.strokeStyle = "white";
-        renderCircle(ctx, drone_X, drone_Y, radius, alpha);
-        testDrone.renderOptimalFlareCircle(ctx, drone_X, drone_Y, alpha);
-        renderText(ctx, drone_Z.toString(), drone_X, drone_Y, radius + 5, alpha);
+        renderCircle(ctx, curDroneLoc[0], curDroneLoc[1], radius, alpha);
+        testDrone.renderOptimalFlareCircle(ctx, curDroneLoc[0], curDroneLoc[1], alpha);
+        renderText(ctx, curDroneLoc[2].toString(), curDroneLoc[0], curDroneLoc[1], radius + 5, alpha);
         ctx.restore()
 
         alpha -= 1 / 60;
         if (alpha < 0) {
             alpha = 1
-            drone_X = testDrone.x
-            drone_Y = testDrone.y
-            drone_Z = testDrone.z
+            curDroneLoc = pendingDroneLoc
+            testDrone.setCoordinate(curDroneLoc[0], curDroneLoc[1], curDroneLoc[2])
+            console.log("canvas.tsx: curDroneLoc updated to: ", curDroneLoc)
             radius = testDrone.z / 10 + 3;
-
         }
     }
     
     // All rendering should happen in this function.
+    // Triggers 30/sec
     function renderObjs(ctx) {
         if (missile.launcherShown)
         {
@@ -84,11 +102,13 @@ const Canvas: Component = () => {
             drawLauncherDirection(ctx);
         }
 
-        if (testDrone.alive == true) {
+        if (testDrone.alive == true && TestingMode() == true) {
             testDrone.findNextPoint();
+            pendingDroneLoc = [testDrone.x, testDrone.y, testDrone.z]
             renderDrone(ctx)
-
-        }
+        } else if (TestingMode() == false) {
+            renderDrone(ctx)
+        }   
         if (missile.alive == true) {
             missile.findNextPoint();
 
@@ -210,7 +230,8 @@ const Canvas: Component = () => {
                 console.log("canvas.tsx: LOS achieved - loc", testDrone.x, testDrone.y);
             }
             // Send location to main process
-            window.rendToMainAPI.sendDroneLoc([testDrone.x, testDrone.y]);
+            console.log("Sending location to drone: ",curDroneLoc[0], curDroneLoc[1])
+            window.rendToMainAPI.sendDroneLoc([curDroneLoc[0], curDroneLoc[1]]);
             frameCount = 0;
         }
     }
@@ -245,7 +266,7 @@ const Canvas: Component = () => {
     onMount(() => {
         console.log("Canvas component mounted");
         const canvas = document.getElementById("canvas") as HTMLCanvasElement;
-        const ctx = canvas.getContext("2d");
+        ctx = canvas.getContext("2d");
 
         if (canvas) {
             // Set canvas size

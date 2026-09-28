@@ -11,9 +11,10 @@ import json
 import localization as lx
 
 # Multilat solver
-P = lx.Project(mode="3D", solver="LSE")
 
 def multilatSolver(anchorNames, anchorLocation, ranging):
+    P = lx.Project(mode="3D", solver="LSE")
+
     # Add anchors
     P.add_anchor(anchorNames[0], anchorLocation[0])
     P.add_anchor(anchorNames[1], anchorLocation[1])
@@ -46,10 +47,10 @@ print("Python worker ready", flush=True)
 anchorNames = ["A0", "A1", "A2", "A3"]
 
 anchorLocation = [
-    (100, 50, 20),
-    (130, 50, 20),
-    (100, 80, 20),
-    (100, 50, 50)
+    (0, 0, 0),
+    (0, 15.58, 4.5),
+    (13.6, 15.58, 7.08),
+    (13.6, 0, 4.08)
 ]
 
 for line in sys.stdin:

@@ -21,61 +21,64 @@ const TestDroneButton: Component = () => {
         testDrone.currentPathIndex = 0;
         testDrone.currentPath.length = 0;
 
-        switch (target.value) {
-            case "path1":
-                testDrone.currentPath.push(
-                    { x: 50, y: 50, z: 10},
-                    { x: 500, y: 50, z: 10 }
-                )
-                
-                break;
-            case "path2":
-                console.log("Path 2 selected");
-                testDrone.currentPath.push(
-                    { x: 10, y: 10, z: 10 },
-                    { x: 10, y: 500, z: 10 },
-                    { x: 500, y: 500, z: 10 },
-                    { x: 500, y: 10, z: 10 }
-                );
-                break;
-            case "path3":
-                console.log("Path 3 selected");
-                testDrone.currentPath.push(
-                    { x: 10, y: 10, z: 10},
-                    { x: 10, y: 10, z: 100 }
-                )
-                break;
-            case "path4":
-                console.log("Path 4 selected");
-                testDrone.currentPath.push(
-                    { x: 10, y: 10, z: 10 },
-                    { x: 50, y: 50, z: 15 },
-                    { x: 100, y: 100, z: 20 },
-                    { x: 150, y: 150, z: 30 },
-                    { x: 200, y: 200, z: 40 },
-                    { x: 250, y: 250, z: 50 },
-                    { x: 300, y: 300, z: 60 },
-                    { x: 350, y: 350, z: 70 },
-                    { x: 400, y: 400, z: 80 },
-                    { x: 450, y: 450, z: 90 },
-                    { x: 500, y: 500, z: 100 },
-                    { x: 450, y: 450, z: 90 },
-                    { x: 400, y: 400, z: 80 },
-                    { x: 350, y: 350, z: 70 },
-                    { x: 300, y: 300, z: 60 },
-                    { x: 250, y: 250, z: 50 },
-                    { x: 200, y: 200, z: 40 },
-                    { x: 150, y: 150, z: 30 },
-                    { x: 100, y: 100, z: 20 },
-                    { x: 50, y: 50, z: 15 },
-                    { x: 10, y: 10, z: 10 }
-                )
-                break;
-            default:
-                testDrone.currentPath = [
-                    { x: 10, y: 10, z: 10 },
-                    { x: 500, y: 10, z: 10 }
-                ];
+        if (TestingMode() == true) {
+            console.log("testingMode")
+            switch (target.value) {
+                case "path1":
+                    testDrone.currentPath.push(
+                        { x: 50, y: 50, z: 10},
+                        { x: 500, y: 50, z: 10 }
+                    )
+                    
+                    break;
+                case "path2":
+                    console.log("Path 2 selected");
+                    testDrone.currentPath.push(
+                        { x: 10, y: 10, z: 10 },
+                        { x: 10, y: 500, z: 10 },
+                        { x: 500, y: 500, z: 10 },
+                        { x: 500, y: 10, z: 10 }
+                    );
+                    break;
+                case "path3":
+                    console.log("Path 3 selected");
+                    testDrone.currentPath.push(
+                        { x: 10, y: 10, z: 10},
+                        { x: 10, y: 10, z: 100 }
+                    )
+                    break;
+                case "path4":
+                    console.log("Path 4 selected");
+                    testDrone.currentPath.push(
+                        { x: 10, y: 10, z: 10 },
+                        { x: 50, y: 50, z: 15 },
+                        { x: 100, y: 100, z: 20 },
+                        { x: 150, y: 150, z: 30 },
+                        { x: 200, y: 200, z: 40 },
+                        { x: 250, y: 250, z: 50 },
+                        { x: 300, y: 300, z: 60 },
+                        { x: 350, y: 350, z: 70 },
+                        { x: 400, y: 400, z: 80 },
+                        { x: 450, y: 450, z: 90 },
+                        { x: 500, y: 500, z: 100 },
+                        { x: 450, y: 450, z: 90 },
+                        { x: 400, y: 400, z: 80 },
+                        { x: 350, y: 350, z: 70 },
+                        { x: 300, y: 300, z: 60 },
+                        { x: 250, y: 250, z: 50 },
+                        { x: 200, y: 200, z: 40 },
+                        { x: 150, y: 150, z: 30 },
+                        { x: 100, y: 100, z: 20 },
+                        { x: 50, y: 50, z: 15 },
+                        { x: 10, y: 10, z: 10 }
+                    )
+                    break;
+                default:
+                    testDrone.currentPath = [
+                        { x: 10, y: 10, z: 10 },
+                        { x: 500, y: 10, z: 10 }
+                    ];
+            }
         }
     }
 
