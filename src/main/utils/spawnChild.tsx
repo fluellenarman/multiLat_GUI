@@ -1,99 +1,106 @@
-import { spawn } from 'child_process';
-import {colorPrint} from './logging'
+import { ChildProcessWithoutNullStreams, spawn } from 'child_process'
+import { colorPrint } from './logging'
 import { BrowserWindow } from 'electron'
 
+let pyProcess: ChildProcessWithoutNullStreams
 
-var pyProcess;
-
-const ranging = [
-    0,
-    0,
-    0,
-    0
-]
+const ranging = [0, 0, 0, 0]
 
 function spawnProcessAndListen(mainWindow: BrowserWindow) {
-    colorPrint("yellow", "Spawning Python process...")
-    pyProcess = spawn('python3', ['-u', 'testingUtil/child_spawn_test/child2.py'])
+	colorPrint('yellow', 'Spawning Python process...')
+	pyProcess = spawn('python3', ['-u', 'testingUtil/child_spawn_test/child2.py'])
 
-    pyProcess.stdout.on('data', (data) => { //Data is a buffer, not an object
-        const str = data.toString()
+	pyProcess.stdout.on('data', (data) => {
+		//Data is a buffer, not an object
+		const str = data.toString()
 
-        try {
-            const obj = JSON.parse(str)
-            // console.log(obj)
-            if (obj.id != undefined) {
-                colorPrint("blue", "spawnChild.tsx: Received drone coords from multilat-child")
-                colorPrint("blue", obj.x, obj.y, obj.z)
-                mainWindow.webContents.send("serialDroneLoc",obj);
-                // console.log(obj) // Send obj to renderer via IPC
-            }
-        } catch {
-            // console.log("skipping message")
-        }
-    })
+		try {
+			const obj = JSON.parse(str)
+			console.log(obj)
+			if (obj.id != undefined) {
+				colorPrint('blue', 'spawnChild.tsx: Received drone coords from multilat-child')
+				colorPrint('blue', obj.x, obj.y, obj.z)
+				mainWindow.webContents.send('serialDroneLoc', obj)
+				// console.log(obj) // Send obj to renderer via IPC
+			}
+		} catch (error) {
+			// console.log('skipping message')
+			// console.log(error)
+		}
+	})
+
+	pyProcess.stderr.on('data', (data) => {
+		colorPrint('red', `Python Stderr Error: ${data.toString()}`)
+	})
 }
 
 function sendMessageToChild(ranging) {
-    if (!pyProcess) {
-        colorPrint("yellow", "spawnChild.tsx: Skipping send, pyProcess not running")
-        return
-    }
-    const message = JSON.stringify(ranging) + '\n';
-    pyProcess.stdin.write(message);
+	if (!pyProcess) {
+		colorPrint('yellow', 'spawnChild.tsx: Skipping send, pyProcess not running')
+		return
+	}
+	const message = JSON.stringify(ranging) + '\n'
+	pyProcess.stdin.write(message)
 }
 
 const maxTimer = 5 // 500 ms
 let curLimitTimer = maxTimer
 
 setInterval(() => {
-    curLimitTimer -= 1
+	curLimitTimer -= 1
 }, 100)
 
 function setRangingData(serialData) {
-    // colorPrint("green", "spawnChild.tsx: Received drone ranging data from serial", serialData)
-    const parts = serialData.replace("Received line:", "").trim().split(/\s+/);
-    const anchor = parts[0]
-    let range = parts[1]
-    if (range > 40) { range = 0 }
-    // colorPrint("green", "spawnChild.tsx: anchor/ranging: ", anchor, range)
-    if (anchor == "A") {
-        ranging[0] = parseFloat(range)
-    } else if (anchor == "B") {
-        ranging[1] = parseFloat(range)
-    } else if (anchor == "C") {
-        ranging[2] = parseFloat(range)
-    } else if (anchor == "D") {
-        ranging[3] = parseFloat(range)
-    }
-    // colorPrint("yellow", "ranging: ", ranging)
-    if ( curLimitTimer <= 0 &&
-        ranging[0] != 0 && ranging[1] != 0 && ranging[2] != 0 && ranging[3] != 0) {
-        //convert meters to feet
-        ranging[0] = ranging[0] * 3.28084
-        ranging[1] = ranging[1] * 3.28084
-        ranging[2] = ranging[2] * 3.28084
-        ranging[3] = ranging[3] * 3.28084
-        colorPrint("yellow", "spawnChild.tsx: Sending ranging data to multilat-child")
-        sendMessageToChild(ranging)
-        curLimitTimer = maxTimer
+	// colorPrint("green", "spawnChild.tsx: Received drone ranging data from serial", serialData)
+	const parts = serialData.replace('Received line:', '').trim().split(/\s+/)
+	const anchor = parts[0]
+	let range = parts[1]
+	if (range > 40) {
+		range = 0
+	}
+	// colorPrint("green", "spawnChild.tsx: anchor/ranging: ", anchor, range)
+	if (anchor == 'A') {
+		ranging[0] = parseFloat(range)
+	} else if (anchor == 'B') {
+		ranging[1] = parseFloat(range)
+	} else if (anchor == 'C') {
+		ranging[2] = parseFloat(range)
+	} else if (anchor == 'D') {
+		ranging[3] = parseFloat(range)
+	}
+	// colorPrint("yellow", "ranging: ", ranging)
+	if (
+		curLimitTimer <= 0 &&
+		ranging[0] != 0 &&
+		ranging[1] != 0 &&
+		ranging[2] != 0 &&
+		ranging[3] != 0
+	) {
+		//convert meters to feet
+		ranging[0] = ranging[0] * 3.28084
+		ranging[1] = ranging[1] * 3.28084
+		ranging[2] = ranging[2] * 3.28084
+		ranging[3] = ranging[3] * 3.28084
+		colorPrint('yellow', 'spawnChild.tsx: Sending ranging data to multilat-child')
+		sendMessageToChild(ranging)
+		curLimitTimer = maxTimer
 
-        for (let i = 0; i < ranging.length; i++) {
-            ranging[i] = 0
-        }
-    }
+		for (let i = 0; i < ranging.length; i++) {
+			ranging[i] = 0
+		}
+	}
 }
 
 // setInterval(() => {
 //     if (!pyProcess) return
-    
+
 //     sendMessageToChild([
 //         rangings[rangingIndex][0],
 //         rangings[rangingIndex][1],
 //         rangings[rangingIndex][2],
 //         rangings[rangingIndex][3],
 //     ])
-//     rangingIndex +=1 
+//     rangingIndex +=1
 //     if (rangingIndex >= rangings.length) {rangingIndex = 0}
 //     sendMessageToChild(
 //         [23.53720459187964,
@@ -118,4 +125,4 @@ function setRangingData(serialData) {
 //     [37.16659448670438, 19.699021451308795, 39.06050376197323, 37.11212823510833],
 // ];
 
-export { spawnProcessAndListen, pyProcess, sendMessageToChild, setRangingData };
+export { spawnProcessAndListen, pyProcess, sendMessageToChild, setRangingData }

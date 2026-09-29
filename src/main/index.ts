@@ -1,3 +1,4 @@
+import os from 'os'
 import { join } from 'path'
 import express from 'express'
 import { app, shell, BrowserWindow, ipcMain } from 'electron'
@@ -5,9 +6,14 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { SerialPort } from 'serialport'
 import { ReadlineParser } from '@serialport/parser-readline'
 import { startServer } from './utils/server'
-import { spawnProcessAndListen, pyProcess, sendMessageToChild, setRangingData} from './utils/spawnChild'
+import {
+	spawnProcessAndListen,
+	pyProcess,
+	sendMessageToChild,
+	setRangingData
+} from './utils/spawnChild'
 import { DiscoveryNetwork } from './network/discovery'
-import { colorPrint } from "./utils/logging"
+import { colorPrint } from './utils/logging'
 import icon from '../../resources/icon.png?asset'
 
 function createWindow(): void {
@@ -27,26 +33,42 @@ function createWindow(): void {
 
 	const discoveryNetwork = new DiscoveryNetwork()
 	startServer(mainWindow, discoveryNetwork)
-	
+
 	if (import.meta.env.MODE != 'test') {
 		spawnProcessAndListen(mainWindow)
-	} else { colorPrint("yellow", "index.ts: Skipping spawning serial/multilat process")}
+	} else {
+		colorPrint('yellow', 'index.ts: Skipping spawning serial/multilat process')
+	}
 
 	// Create serial port
+	const platform = os.platform()
+	let serialPath: string
+
+	switch (platform) {
+		case 'win32':
+			serialPath = 'COM7'
+			break
+		case 'linux':
+			serialPath = '/dev/ttyACM0'
+			break
+		default:
+			throw new Error(`Unsupported OS platform: ${platform}`)
+	}
+
 	const port = new SerialPort({
-		path: '/dev/ttyACM0',
+		path: serialPath,
 		baudRate: 115200,
 		autoOpen: false
 	})
 	// Open the port
 	port.open((err) => {
 		if (err) {
-			colorPrint("red")
+			colorPrint('red')
 			console.error('Failed to open port:', err.message)
 			return
 		}
 		// console.log('Serial Port is open!')
-		colorPrint("green", "Serial Port is open")
+		colorPrint('green', 'Serial Port is open')
 	})
 	const parser = new ReadlineParser({
 		delimiter: '\n',
@@ -119,7 +141,7 @@ app.whenReady().then(() => {
 	ipcMain.on('message-channel', (_event, data) => {
 		// console.log('Received message from renderer:', data);
 		if (!pyProcess) {
-			colorPrint("yellow", "index.ts: Skipping message-channel, pyProcess not running")
+			colorPrint('yellow', 'index.ts: Skipping message-channel, pyProcess not running')
 			return
 		}
 		const message = JSON.stringify(data) + '\n'
