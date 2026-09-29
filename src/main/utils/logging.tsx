@@ -1,5 +1,6 @@
 
 function colorPrint(color: string, ...message: any[]) {
+    color = color.toLowerCase();
     let c: string;
     let msg: string = message.join(' ');
     switch (color) {

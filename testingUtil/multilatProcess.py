@@ -4,7 +4,7 @@ import localization as lx
 P = lx.Project(mode="3D", solver="LSE")
 
 # process string into usable input for multilatSovler
-def preProcess(received):
+# def preProcess(received):
     # It's a string
     
 

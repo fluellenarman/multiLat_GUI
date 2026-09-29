@@ -34,6 +34,9 @@ if (process.contextIsolated) {
 				ipcRenderer.on('reqToLOSLoc', (_event, data) => callback(data)),
 			onIPforHTML: (callback) =>
 				ipcRenderer.on('reqIP-for-HTML', (_event, data) => callback(data)),
+			//Serial drone location to render
+			onSerialDroneLoc: (callback) =>
+				ipcRenderer.on('serialDroneLoc', (_event, data) => callback(data)),
 
 			getLocalIP: () => ipcRenderer.invoke('get-local-ip'),
 			getDevices: () => ipcRenderer.invoke('get-devices'),

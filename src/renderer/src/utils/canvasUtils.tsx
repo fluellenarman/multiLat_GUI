@@ -235,7 +235,10 @@ class droneState {
 	ifAtPoint() {
 		const deviation = 5
 		const dest = this.currentPath[this.currentPathIndex]
+		console.log(this.currentPath, this.currentPathIndex)
 		// const distance = distanceBetweenPoints(this.x, this.y, dest.x, dest.y);
+		console.log(this.x, this.y, this.z)
+		console.log(dest.x, dest.y, dest.z)
 		const distance = d3_distanceBetweenPoints(this.x, this.y, this.z, dest.x, dest.y, dest.z)
 
 		if (distance <= deviation) {
@@ -259,6 +262,21 @@ class droneState {
 		ctx.beginPath()
 		ctx.arc(x, y, 100, 0, 2 * Math.PI)
 		ctx.stroke()
+	}
+
+	setCoordinate(x, y, z) {
+		this.x = x
+		this.y = y
+		this.z = z
+	}
+}
+
+// Used for rendering icons who'se determined by serial data
+class serialDroneState extends droneState {
+	setCoordinate(x, y, z) {
+		this.x = x
+		this.y = y
+		this.z = z
 	}
 }
 
@@ -445,18 +463,18 @@ function renderCircle(
 	ctx.stroke()
 }
 
-function renderX(ctx: CanvasRenderingContext2D, x: number, y: number, radius: number) {
+function renderX(ctx: CanvasRenderingContext2D, curDroneLoc: number[], radius: number) {
 	ctx.save()
 
 	ctx.lineWidth = 4
 
 	ctx.beginPath()
 
-	ctx.moveTo(x - radius, y - radius)
-	ctx.lineTo(x + radius, y + radius)
+	ctx.moveTo(curDroneLoc[0] - radius, curDroneLoc[1] - radius)
+	ctx.lineTo(curDroneLoc[0] + radius, curDroneLoc[1] + radius)
 
-	ctx.moveTo(x + radius, y - radius)
-	ctx.lineTo(x - radius, y + radius)
+	ctx.moveTo(curDroneLoc[0] + radius, curDroneLoc[1] - radius)
+	ctx.lineTo(curDroneLoc[0] - radius, curDroneLoc[1] + radius)
 
 	ctx.stroke()
 
@@ -674,5 +692,6 @@ export {
 	missile,
 	drone1,
 	drone2,
-	testDrone
+	testDrone,
+	serialDroneState
 }
