@@ -32,7 +32,7 @@ const FlareButton: Component = () => {
 				)
 				flare.x = testDrone.x
 				flare.y = testDrone.y
-				flare.z = testDrone.z
+				flare.z = Math.floor((Math.random() * 2 - 1) * testDrone.z) + testDrone.z
 				flare.lifespan = 5
 				flare.id = id
 				if (i == 1) {
@@ -100,15 +100,17 @@ const FlareButton: Component = () => {
 			flareButton.innerHTML = flareImage
 		}
 
-		let timeLeft = 5
-		const countdown = setInterval(() => {
-			timeLeft--
+		if (restockButton) {
+			let timeLeft = 5
+			const countdown = setInterval(() => {
+				timeLeft--
 
-			if (timeLeft <= 0) {
-				clearInterval(countdown)
-				restockButton.disabled = false
-			}
-		}, 1000)
+				if (timeLeft <= 0) {
+					clearInterval(countdown)
+					restockButton.disabled = false
+				}
+			}, 1000)
+		}
 
 		// flareButton.disabled = true
 
