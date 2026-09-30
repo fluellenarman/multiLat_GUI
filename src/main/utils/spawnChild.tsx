@@ -1,6 +1,7 @@
 import { ChildProcessWithoutNullStreams, spawn } from 'child_process'
-import { colorPrint } from './logging'
 import { BrowserWindow } from 'electron'
+
+import { colorPrint } from './logging'
 
 let pyProcess: ChildProcessWithoutNullStreams
 
@@ -16,11 +17,11 @@ function spawnProcessAndListen(mainWindow: BrowserWindow) {
 
 		try {
 			const obj = JSON.parse(str)
-			console.log(obj)
+			// console.log(obj)
 			if (obj.id != undefined) {
 				colorPrint('blue', 'spawnChild.tsx: Received drone coords from multilat-child')
 				colorPrint('blue', obj.x, obj.y, obj.z)
-				mainWindow.webContents.send('serialDroneLoc', obj)
+				mainWindow.webContents.send('serial-data', obj)
 				// console.log(obj) // Send obj to renderer via IPC
 			}
 		} catch (error) {
@@ -51,7 +52,7 @@ setInterval(() => {
 }, 100)
 
 function setRangingData(serialData) {
-	// colorPrint("green", "spawnChild.tsx: Received drone ranging data from serial", serialData)
+	// colorPrint('green', 'spawnChild.tsx: Received drone ranging data from serial', serialData)
 	const parts = serialData.replace('Received line:', '').trim().split(/\s+/)
 	const anchor = parts[0]
 	let range = parts[1]

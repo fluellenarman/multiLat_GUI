@@ -1,59 +1,49 @@
 import { contextBridge, ipcRenderer } from 'electron'
-import { electronAPI } from '@electron-toolkit/preload'
 
-// Custom APIs for renderer
-const api = {
-	onSerialData: (callback) => ipcRenderer.on('serial-data', (_event, data) => callback(data))
+export const toMainAPI = {
+	rangingData: (data) => ipcRenderer.send('ranging-data', data),
+
+	connectToAddress: (data) => ipcRenderer.send('connect-to-address', data),
+
+	sendDroneLocation: (data) => ipcRenderer.send('send-drone-location', data),
+	sendMissileLocation: (data) => ipcRenderer.send('send-missile-location', data),
+
+	sendDroneStatus: (data) => ipcRenderer.send('send-drone-status', data),
+
+	sendFlare: () => ipcRenderer.send('send-flare'),
+	sendJam: () => ipcRenderer.send('send-jam')
 }
 
-// Use `contextBridge` APIs to expose Electron APIs to
-// renderer only if context isolation is enabled, otherwise
-// just add to the DOM global.
+export const toRendererAPI = {
+	serialData: (callback) => ipcRenderer.on('serial-data', (_, data) => callback(data)),
+
+	lineOfSight: (callback) => ipcRenderer.on('line-of-sight', (_, data) => callback(data)),
+	launchMissile: (callback) => ipcRenderer.on('launch-missile', () => callback()),
+
+	missileLauncherLocation: (callback) =>
+		ipcRenderer.on('missile-launcher-location', (_, data) => callback(data)),
+	lineOfSightLocation: (callback) =>
+		ipcRenderer.on('line-of-sight-location', (_, data) => callback(data)),
+
+	getLocalAddress: () => ipcRenderer.invoke('get-local-address'),
+	getDevices: () => ipcRenderer.invoke('get-devices'),
+
+	onEnableAddressButton: (callback) =>
+		ipcRenderer.on('enable-ip-button', (_event, data) => callback(data)),
+	onDisableAddressButton: (callback) =>
+		ipcRenderer.on('disable-ip-button', (_event, data) => callback(data))
+}
+
 if (process.contextIsolated) {
 	try {
-		contextBridge.exposeInMainWorld('electron', electronAPI)
-		contextBridge.exposeInMainWorld('api', api)
-
-		// one-way: renderer -> main, no response needed
-		contextBridge.exposeInMainWorld('rendToMainAPI', {
-			sendMessage: (data) => ipcRenderer.send('message-channel', data),
-			sendIP: (data) => ipcRenderer.send('IP-address', data),
-			sendDroneLoc: (data) => ipcRenderer.send('droneLoc', data),
-			sendMissileLoc: (data) => ipcRenderer.send('missileLoc', data),
-			sendFlarePing: (data) => ipcRenderer.send('flarePing', data),
-			sendJamPing: () => ipcRenderer.send('jam-ping'),
-			sendDroneStatusPing: (data) => ipcRenderer.send('droneStatus', data)
-		})
-		contextBridge.exposeInMainWorld('electronAPI', {
-			// main to renderer
-			onPing: (callback) => ipcRenderer.on('ping', (_event, data) => callback(data)),
-			onReqToLaunch: (callback) => ipcRenderer.on('reqToLaunch', () => callback()),
-			onReqToLauncherLoc: (callback) =>
-				ipcRenderer.on('reqToLauncherLoc', (_event, data) => callback(data)),
-			onReqToLOSLoc: (callback) =>
-				ipcRenderer.on('reqToLOSLoc', (_event, data) => callback(data)),
-			onIPforHTML: (callback) =>
-				ipcRenderer.on('reqIP-for-HTML', (_event, data) => callback(data)),
-			//Serial drone location to render
-			onSerialDroneLoc: (callback) =>
-				ipcRenderer.on('serialDroneLoc', (_event, data) => callback(data)),
-
-			getLocalIP: () => ipcRenderer.invoke('get-local-ip'),
-			getDevices: () => ipcRenderer.invoke('get-devices'),
-
-			onIP_feedback: (callback) =>
-				ipcRenderer.on('sendIP-feedback', (_event, data) => callback(data)),
-			onEnableAddressButton: (callback) =>
-				ipcRenderer.on('enable-ip-button', (_event, value) => callback(value)),
-			onDisableAddressButton: (callback) =>
-				ipcRenderer.on('disable-ip-button', (_event, value) => callback(value))
-		})
+		contextBridge.exposeInMainWorld('toMain', toMainAPI)
+		contextBridge.exposeInMainWorld('toRenderer', toRendererAPI)
 	} catch (error) {
 		console.error(error)
 	}
 } else {
 	// @ts-ignore (define in dts)
-	window.electron = electronAPI
+	window.toMain = toMainAPI
 	// @ts-ignore (define in dts)
-	window.api = api
+	window.toRenderer = toRendererAPI
 }

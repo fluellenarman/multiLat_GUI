@@ -1,39 +1,29 @@
 import { Component, onMount } from 'solid-js'
+
+import { flareArr } from './flaresButton'
+import { TestingMode } from '../utils/testingMode'
 import {
-	utilFoo,
 	renderCircle,
 	renderX,
 	renderText,
 	renderRedCircle,
 	renderRect,
 	changeLauncherDirection,
-	renderRedRect,
 	missile,
 	testDrone,
 	drawLauncherDirection,
 	droneTracker,
 	flareState
 } from '../utils/canvasUtils'
-import { flareArr } from './flaresButton'
-import { contextBridge, ipcRenderer } from 'electron'
-import test from 'node:test'
-import { TestingMode, setTestingMode, toggleTestingMode } from '../utils/testingMode'
 
-interface renderBuffObj {
-	x: number
-	y: number
-	id: string
-}
-
-window.electronAPI.onPing((data) => {
-	console.log('Received ping from main process:', data)
-	droneTracker.LOS_lifetime = droneTracker.LOS_default_lifetime // Reset LOS lifetime on ping
+window.toRenderer.lineOfSight(() => {
+	droneTracker.LOS_lifetime = droneTracker.LOS_default_lifetime
 	droneTracker.LOS_achieved = true
 	droneTracker.shouldDrawLine = true
 	droneTracker.showTracker = true
 })
 
-window.electronAPI.onReqToLauncherLoc((data) => {
+window.toRenderer.missileLauncherLocation((data: { x: number; y: number }) => {
 	console.log('Received reqToLauncherLoc from main process', data)
 	const launcherLoc = {
 		x: data.x * 20,
@@ -43,7 +33,7 @@ window.electronAPI.onReqToLauncherLoc((data) => {
 	missile.launcherY = launcherLoc.y
 })
 
-window.electronAPI.onReqToLOSLoc((data) => {
+window.toRenderer.lineOfSightLocation((data: { x: number; y: number }) => {
 	console.log('Received reqToLOSLoc from main process', data)
 	const LOSLoc = {
 		x: data.x * 20,
@@ -55,26 +45,18 @@ window.electronAPI.onReqToLOSLoc((data) => {
 const Canvas: Component = () => {
 	let global_x = 0
 	let global_y = 0
-	let renderBuffer: renderBuffObj[] = []
 
 	let alpha = 1
-	let drone_X = testDrone.x
-	let drone_Y = testDrone.y
-	let drone_Z = testDrone.z
 	let radius = testDrone.z / 10 + 3
 
 	let ctx
 	let curDroneLoc = [0, 0, 0]
 	let pendingDroneLoc = [0, 0, 0]
 
-	window.electronAPI.onSerialDroneLoc((data) => {
+	window.toRenderer.serialData((data) => {
 		if (TestingMode() == false) {
-			// console.log('canvas.tsx: cur drone loc', testDrone.x, testDrone.y)
-			// need to translate data into canvas dimensions
 			data.x = data.x * 44.11
 			data.y = data.y * 38.51
-			// console.log("canvs.tsx: serialDroneLoc", data)
-			// console.log("canvas.tsx: ctx.globalAlpha: ", ctx.globalAlpha)
 			console.log(data.id, data.x, data.y, data.z)
 			pendingDroneLoc = [data.x, data.y, data.z]
 		}
@@ -114,11 +96,11 @@ const Canvas: Component = () => {
 			drawLauncherDirection(ctx)
 		}
 
-		if (testDrone.alive == true && TestingMode() == true) {
+		if (testDrone.alive && TestingMode()) {
 			testDrone.findNextPoint()
 			pendingDroneLoc = [testDrone.x, testDrone.y, testDrone.z]
 			renderDrone(ctx)
-		} else if (TestingMode() == false) {
+		} else if (testDrone.alive && !TestingMode()) {
 			renderDrone(ctx)
 		} else {
 			renderX(ctx, curDroneLoc, radius)
@@ -144,7 +126,6 @@ const Canvas: Component = () => {
 				let flare: flareState = flareArr[i]
 				if (flare.alive != true) {
 					continue
-					flareArr.splice(i, 1)
 				} else {
 					flare.findNextPoint()
 
@@ -202,16 +183,8 @@ const Canvas: Component = () => {
 	}
 
 	function testIntervalFoo(ctx, canvas) {
-		// console.log("testIntervalFoo called");
-		// console.log(canvas.width, canvas.height);
 		ctx.clearRect(0, 0, canvas.width, canvas.height)
 		drawGrid(ctx, canvas)
-		let obj: renderBuffObj = {
-			x: 50 + global_x,
-			y: 50 + global_y,
-			id: 'test1'
-		}
-		// renderBuffer.push(obj);
 		secTriggerCheck(ctx)
 		requestAnimationFrame(() => renderObjs(ctx))
 
@@ -223,12 +196,10 @@ const Canvas: Component = () => {
 	function secTriggerCheck(ctx) {
 		frameCount += 1
 		if (frameCount >= 30) {
-			// console.log("TestDrone forward angle: ", testDrone.forwardAngle)
-			// console.log("Second triggered");
 			if (missile.alive == true) {
 				console.log('Missile lifespan: ' + missile.lifespan.toString())
 				missile.lifespan -= 1
-				window.rendToMainAPI.sendMissileLoc([missile.x, missile.y])
+				window.toMain.sendMissileLocation([missile.x, missile.y])
 				if (missile.lifespan <= 0) {
 					missile.alive = false
 					console.log('Missile expired')
@@ -265,43 +236,8 @@ const Canvas: Component = () => {
 			}
 			// Send location to main process
 			console.log('Sending location to drone: ', curDroneLoc[0], curDroneLoc[1])
-			window.rendToMainAPI.sendDroneLoc([curDroneLoc[0], curDroneLoc[1]])
+			window.toMain.sendDroneLocation([curDroneLoc[0], curDroneLoc[1]])
 			frameCount = 0
-		}
-	}
-
-	const targetLocations = [
-		['A', 0],
-		['B', 0],
-		['C', 0],
-		['D', 0]
-	]
-
-	function preProcessSerialData(data: string) {
-		const preArr = data.trim().split(/\s+/)
-		const letter = preArr[0] // 'A'
-		const num = preArr[1] // '1.50'
-		if (letter == 'A') {
-			targetLocations[0][1] = Number(num)
-		} else if (letter == 'B') {
-			targetLocations[1][1] = Number(num)
-		} else if (letter == 'C') {
-			targetLocations[2][1] = Number(num)
-		} else if (letter == 'D') {
-			targetLocations[3][1] = Number(num)
-		}
-	}
-
-	function ifTargetLocComplete() {
-		if (
-			targetLocations[0][1] != 0 &&
-			targetLocations[1][1] != 0 &&
-			targetLocations[2][1] != 0 &&
-			targetLocations[3][1] != 0
-		) {
-			return true
-		} else {
-			return false
 		}
 	}
 
@@ -311,39 +247,10 @@ const Canvas: Component = () => {
 		ctx = canvas.getContext('2d')
 
 		if (canvas) {
-			// Set canvas size
 			canvas.width = 600
 			canvas.height = 600
-			// requestAnimationFrame(testFrame);
 			setInterval(() => testIntervalFoo(ctx, canvas), 1000 / 30)
 		}
-
-		// Listen for Serial data
-		window.api.onSerialData((data: string) => {
-			console.log('Received serial data in renderer:', data)
-			preProcessSerialData(data)
-			// Send data to mulilatProcess py
-			if (ifTargetLocComplete() == true) {
-				console.log('targetLocCompleted')
-				const ranging = [
-					targetLocations[0][1],
-					targetLocations[1][1],
-					targetLocations[2][1],
-					targetLocations[3][1]
-				]
-
-				// Here, would send the ranging data to Python Child process
-				// renderer -IPC-> main -> python child
-				console.log(ranging)
-				window.rendToMainAPI.sendMessage(ranging) // replace testData with ranging
-
-				// End targetLocation
-				targetLocations[0][1] = 0
-				targetLocations[1][1] = 0
-				targetLocations[2][1] = 0
-				targetLocations[3][1] = 0
-			}
-		})
 
 		canvas?.addEventListener('click', (event) => {
 			const rect = canvas.getBoundingClientRect()

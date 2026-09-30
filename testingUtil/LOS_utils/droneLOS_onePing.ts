@@ -2,25 +2,14 @@
 This is a test file that will send test pings to the server
 */
 
-console.log("droneLOStrackerTest.ts: STARTING TESTS")
+console.log('droneLOStrackerTest.ts: STARTING TESTS')
 
 async function sendTestPing() {
-    const testURL = 'http://localhost:3003/pingLOS'; // Replace with your server URL
-    const pingData = {
-        ping: true,
-    };
-
-    fetch(testURL, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(pingData),
-        keepalive: true
-    }).catch(() => {}); // Ignore any errors
+	const testURL = 'http://localhost:3003/line-of-sight' // Replace with your server URL
+	fetch(testURL)
 }
 
-sendTestPing();
+sendTestPing()
 
 // let sendPingCount = 0;
 // let sendingPing = true;
@@ -41,4 +30,3 @@ sendTestPing();
 //         sendingPing = true;
 //     }
 // }, 300)
-

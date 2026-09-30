@@ -1,7 +1,7 @@
-import { createSignal } from 'solid-js';
+import { createSignal } from 'solid-js'
 
-const [TestingMode, setTestingMode] = createSignal(false);
+const [TestingMode, setTestingMode] = createSignal(false)
 
-const toggleTestingMode = () => setTestingMode(!TestingMode());
+const toggleTestingMode = () => setTestingMode(!TestingMode())
 
-export { TestingMode, setTestingMode, toggleTestingMode };
+export { TestingMode, setTestingMode, toggleTestingMode }

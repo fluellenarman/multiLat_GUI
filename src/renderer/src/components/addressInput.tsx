@@ -1,43 +1,24 @@
-//This component is to spawn in the testing drone for testing purposes. It will be used to test the drone's movement and behavior in the environment.
-
-import { Component, For, Show, createSignal, createResource } from 'solid-js'
+import { Component, createResource, createSignal, For, Show } from 'solid-js'
 import toast from 'solid-toast'
 
-const IP_addressInput: Component = () => {
+export const AddressInput: Component = () => {
 	let ipButton!: HTMLButtonElement
 
 	const [ShowAddressInput, setShowAddressInput] = createSignal(false)
 	const toggleShowAddressInput = () => setShowAddressInput(!ShowAddressInput())
 
 	const fetchDevices = async () => {
-		const result = await window.electronAPI.getDevices()
+		const result = await window.toRenderer.getDevices()
 		return [...result]
 	}
 
 	const [devices] = createResource(fetchDevices)
 
-	window.electronAPI.onIP_feedback((data) => {
-		console.log('IP_addressInput.tsx: onIP_feedback: HIT')
-		if (data == 'progress') {
-			toast.loading('Connecting to IP address...', { duration: 3000 })
-			console.log('IP_addressInput.tsx: onReqToLOSLoc: progress')
-		} else if (data == 'success') {
-			console.log('IP_addressInput.tsx: onReqToLOSLoc: success')
-			toast.success('Successfully connected to IP address.', { duration: 5000 })
-		} else if (data == 'failed') {
-			console.log('IP_addressInput.tsx: onReqToLOSLoc: failed')
-			toast.error(
-				'Failed to connect to IP address. Please check the address and try again.',
-				{ duration: 5000 }
-			)
-		}
-	})
-
-	window.electronAPI.onEnableAddressButton((data) => {
+	window.toRenderer.onEnableAddressButton(() => {
 		ipButton.disabled = false
 	})
 
-	window.electronAPI.onDisableAddressButton(() => {
+	window.toRenderer.onDisableAddressButton(() => {
 		ipButton.disabled = true
 		toggleShowAddressInput()
 	})
@@ -47,7 +28,7 @@ const IP_addressInput: Component = () => {
 		const ip = document.getElementById('IP-address') as HTMLInputElement
 
 		console.log('IP Address entered: ' + ip.value)
-		window.rendToMainAPI.sendIP({ id: id.value, ip: ip.value })
+		window.toMain.connectToAddress({ id: id.value, ip: ip.value })
 	}
 
 	return (
@@ -118,5 +99,4 @@ const IP_addressInput: Component = () => {
 	)
 }
 
-// export default FlareButton
-export { IP_addressInput }
+export default { AddressInput }

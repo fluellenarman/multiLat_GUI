@@ -143,7 +143,7 @@ class MissileState {
 			this.chanceToTrackFlare = 0.5
 			if (this.target instanceof droneState) {
 				console.log('Drone hit')
-				window.rendToMainAPI.sendDroneStatusPing(this.target.alive)
+				window.toMain.sendDroneStatus(this.target.alive)
 			}
 		}
 	}

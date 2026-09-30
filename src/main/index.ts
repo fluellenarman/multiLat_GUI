@@ -2,29 +2,26 @@ import os from 'os'
 import { join } from 'path'
 import express from 'express'
 import { app, shell, BrowserWindow, ipcMain } from 'electron'
-import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { SerialPort } from 'serialport'
+import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { ReadlineParser } from '@serialport/parser-readline'
-import { startServer } from './utils/server'
-import {
-	spawnProcessAndListen,
-	pyProcess,
-	sendMessageToChild,
-	setRangingData
-} from './utils/spawnChild'
-import { DiscoveryNetwork } from './network/discovery'
+
 import { colorPrint } from './utils/logging'
+import DiscoveryNetwork from './network/discovery'
+import { startServer } from './utils/server'
+import { spawnProcessAndListen, pyProcess, setRangingData } from './utils/spawnChild'
 import icon from '../../resources/icon.png?asset'
 
 function createWindow(): void {
-	// Create the browser window.
+	const platform = os.platform()
+
 	const mainWindow = new BrowserWindow({
 		width: 700,
 		height: 750,
 		resizable: false,
 		show: false,
 		autoHideMenuBar: true,
-		...(process.platform === 'linux' ? { icon } : {}),
+		...(platform === 'linux' ? { icon } : {}),
 		webPreferences: {
 			preload: join(__dirname, '../preload/index.js'),
 			sandbox: false
@@ -40,10 +37,7 @@ function createWindow(): void {
 		colorPrint('yellow', 'index.ts: Skipping spawning serial/multilat process')
 	}
 
-	// Create serial port
-	const platform = os.platform()
 	let serialPath: string
-
 	switch (platform) {
 		case 'win32':
 			serialPath = 'COM7'
@@ -60,14 +54,12 @@ function createWindow(): void {
 		baudRate: 115200,
 		autoOpen: false
 	})
-	// Open the port
 	port.open((err) => {
 		if (err) {
 			colorPrint('red')
 			console.error('Failed to open port:', err.message)
 			return
 		}
-		// console.log('Serial Port is open!')
 		colorPrint('green', 'Serial Port is open')
 	})
 	const parser = new ReadlineParser({
@@ -75,19 +67,13 @@ function createWindow(): void {
 		encoding: 'utf8',
 		includeDelimiter: false
 	})
-	// Pipe port to parser
 	port.pipe(parser)
 
 	parser.on('data', (line) => {
 		const serialData = line.trim()
-		// colorPrint("blue", "received serial data")
-		// console.log('Received line:', serialData);
 		setRangingData(serialData)
-
-		// mainWindow.webContents.send('serial-data', serialData)
 	})
 
-	// Express Server for testing (Receiving test Serial data)
 	const server = express()
 	server.use(express.json())
 	server.listen(3004, () => console.log('Listening on port 3000 for test serial data...'))
@@ -138,10 +124,10 @@ app.whenReady().then(() => {
 	ipcMain.on('ping', () => console.log('pong'))
 
 	// Listen to for messages from renderer // specifically for python child
-	ipcMain.on('message-channel', (_event, data) => {
+	ipcMain.on('ranging-data', (_event, data) => {
 		// console.log('Received message from renderer:', data);
 		if (!pyProcess) {
-			colorPrint('yellow', 'index.ts: Skipping message-channel, pyProcess not running')
+			colorPrint('yellow', 'index.ts: Skipping ranging data, pyProcess not running')
 			return
 		}
 		const message = JSON.stringify(data) + '\n'

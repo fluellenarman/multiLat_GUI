@@ -7,12 +7,12 @@
     "src/preload/*.d.ts"
 , "src/main/utils/spawnChild.tsx"  ],
   "compilerOptions": {
+    "noEmit": true,
     "composite": true,
     "jsxImportSource": "solid-js",
-    "baseUrl": ".",
     "paths": {
       "@renderer/*": [
-        "src/renderer/src/*"
+        "./src/renderer/src/*"
       ]
     }
   }

@@ -1,13 +1,12 @@
-//This component is to spawn in the testing drone for testing purposes. It will be used to test the drone's movement and behavior in the environment.
-
 import { Component, createSignal, Show } from 'solid-js'
+
 import { testDrone } from '../utils/canvasUtils'
 import { flareState } from '../utils/canvasUtils'
-import { d3_distanceBetweenPoints, missile, pointFromAngleAndDistance } from '../utils/canvasUtils'
+import { d3_distanceBetweenPoints, missile } from '../utils/canvasUtils'
 
 const MAX_FLARES = 3
-let flareArr = []
-const FlareButton: Component = () => {
+export let flareArr: flareState[] = []
+export const FlareButton: Component = () => {
 	let flareButton!: HTMLButtonElement
 	let restockButton!: HTMLButtonElement
 	let flareImage
@@ -24,12 +23,7 @@ const FlareButton: Component = () => {
 				id += 1
 				frameCounter = 0
 				let flare = new flareState()
-				const point = pointFromAngleAndDistance(
-					testDrone.x,
-					testDrone.y,
-					testDrone.rearAngle,
-					20
-				)
+
 				flare.x = testDrone.x
 				flare.y = testDrone.y
 				flare.z = Math.floor((Math.random() * 2 - 1) * testDrone.z) + testDrone.z
@@ -84,7 +78,7 @@ const FlareButton: Component = () => {
 
 	function handleClick() {
 		console.log('Flare button clicked!')
-		window.rendToMainAPI.sendFlarePing()
+		window.toMain.sendFlare()
 		// for (let i = 0; i < 5; i++) {
 		const interval = setInterval(() => handleFrame(interval), 30)
 		// }
@@ -111,23 +105,6 @@ const FlareButton: Component = () => {
 				}
 			}, 1000)
 		}
-
-		// flareButton.disabled = true
-
-		// const flareImage = flareButton.innerHTML
-
-		// let timeLeft = 60;
-
-		// const countdown = setInterval(() => {
-		//     timeLeft--;
-		//     flareButton.textContent = `${timeLeft}`;
-
-		//     if (timeLeft <= 0) {
-		//         clearInterval(countdown);
-		//         flareButton.disabled = false;
-		//         flareButton.innerHTML = flareImage;
-		//     }
-		// }, 1000);
 	}
 
 	function handleAdd() {
@@ -182,5 +159,4 @@ const FlareButton: Component = () => {
 	)
 }
 
-// export default FlareButton
-export { FlareButton, flareArr }
+export default { FlareButton }

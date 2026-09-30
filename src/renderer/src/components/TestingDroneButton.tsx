@@ -1,22 +1,19 @@
-//This component is to spawn in the testing drone for testing purposes. It will be used to test the drone's movement and behavior in the environment.
+import { Component, Show } from 'solid-js'
 
-import { Component } from 'solid-js'
-import { Show } from 'solid-js'
+import { TestingMode, toggleTestingMode } from '../utils/testingMode'
 import { testDrone } from '../utils/canvasUtils'
-import { TestingMode, setTestingMode, toggleTestingMode } from '../utils/testingMode'
-import { handleClick } from './launchMissileButton'
 
 const isTestMode = () => import.meta.env.VITE_TEST_MODE === 'true'
 
-const TestDroneButton: Component = () => {
+export const TestDroneButton: Component = () => {
 	function handleClick() {
 		testDrone.alive = true
-		window.rendToMainAPI.sendDroneStatusPing(testDrone.alive)
+		window.toMain.sendDroneStatus(testDrone.alive)
 	}
 
 	function handleClickTestMode() {
 		testDrone.alive = true
-		window.rendToMainAPI.sendDroneStatusPing(testDrone.alive)
+		window.toMain.sendDroneStatus(testDrone.alive)
 		toggleTestingMode()
 	}
 

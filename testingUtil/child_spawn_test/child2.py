@@ -12,6 +12,7 @@ import localization as lx
 
 # Multilat solver
 
+
 def multilatSolver(anchorNames, anchorLocation, ranging):
     P = lx.Project(mode="3D", solver="LSE")
 
@@ -33,25 +34,14 @@ def multilatSolver(anchorNames, anchorLocation, ranging):
     # Solve
     P.solve()
 
-    formattedData = {
-        "id": 0,
-        "x": target.loc.x,
-        "y": target.loc.y,
-        "z": target.loc.z
-    }
+    formattedData = {"id": 0, "x": target.loc.x, "y": target.loc.y, "z": target.loc.z}
 
     return formattedData
 
-print("Python worker ready", flush=True)
 
 anchorNames = ["A0", "A1", "A2", "A3"]
 
-anchorLocation = [
-    (0, 0, 0),
-    (0, 15.58, 4.5),
-    (13.6, 15.58, 7.08),
-    (13.6, 0, 4.08)
-]
+anchorLocation = [(0, 0, 0), (0, 15.58, 4.5), (13.6, 15.58, 7.08), (13.6, 0, 4.08)]
 
 for line in sys.stdin:
     line = line.strip()
@@ -63,5 +53,3 @@ for line in sys.stdin:
     result = json.dumps(output)
     # result = f"Processed: {output}"
     print(result, flush=True)  # flush=True is essential
-
-print("child2.py END")

@@ -2,7 +2,7 @@ import { Component } from 'solid-js'
 
 export const JamButton: Component = () => {
 	function handleClick() {
-		window.rendToMainAPI.sendJamPing()
+		window.toMain.sendJam()
 	}
 
 	return (
